@@ -12,7 +12,7 @@ struct ContentView: View {
     @State private var hours: String = "0"
     @State private var minutes: String = "0"
     @State private var seconds: String = "0"
-    @State private var isAlwaysOnTop: Bool = false
+    @State private var isAlwaysOnTop: Bool = true
     @State private var isDarkMode: Bool = false
     @State private var showingCountdown: Bool = false
     
@@ -59,10 +59,17 @@ struct ContentView: View {
         }
         .frame(width: 400, height: 300)
         .preferredColorScheme(isDarkMode ? .dark : .light)
+        .background(WindowAccessor { window in
+            window.standardWindowButton(.closeButton)?.target = window
+            window.standardWindowButton(.closeButton)?.action = #selector(NSWindow.close)
+            
+            window.delegate = WindowDelegate.shared
+        })
     }
     
     private func hideMainWindow() {
         if let window = NSApplication.shared.windows.first {
+            NSApplication.shared.setActivationPolicy(.accessory)
             window.close()
         }
     }
@@ -120,6 +127,36 @@ struct TimeInputField: View {
                 }
         }
     }
+}
+
+// 添加一个 WindowDelegate 类来处理窗口事件
+class WindowDelegate: NSObject, NSWindowDelegate {
+    static let shared = WindowDelegate()
+    
+    func windowWillClose(_ notification: Notification) {
+        if let window = notification.object as? NSWindow,
+           window.contentView?.subviews.first is NSHostingView<ContentView> {
+            // 如果是主窗口被关闭，则退出应用
+            NSApplication.shared.terminate(nil)
+        }
+    }
+}
+
+// 用于访问窗口的辅助视图
+struct WindowAccessor: NSViewRepresentable {
+    let callback: (NSWindow) -> Void
+    
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            if let window = view.window {
+                callback(window)
+            }
+        }
+        return view
+    }
+    
+    func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
 #Preview {
