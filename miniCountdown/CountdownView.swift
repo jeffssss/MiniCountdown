@@ -38,7 +38,8 @@ struct CountdownView: View {
             // 关闭按钮
             if isMouseInside {
                 Button(action: {
-                    NSApplication.shared.terminate(nil)
+                    AppDelegate.shared?.isCountdownRunning = false
+                    closeCountdownWindow()
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 16))
@@ -83,6 +84,8 @@ struct CountdownView: View {
             if let windows = NSApplication.shared.windows.first(where: { window in
                 return window.contentView is NSHostingView<CountdownView>
             }) {
+                // 先更新状态，再关闭窗口
+                AppDelegate.shared?.isCountdownRunning = false
                 windows.close()
             }
         }
@@ -103,32 +106,23 @@ struct CountdownView: View {
     }
     
     private func showCenteredAlert() {
-        let alert = NSAlert()
-        alert.messageText = "倒计时结束"
-        alert.informativeText = "时间到了！"
-        alert.alertStyle = .informational
-        alert.addButton(withTitle: "确定")
-        
-        if let iconImage = NSImage(systemSymbolName: "timer", accessibilityDescription: nil) {
-            iconImage.size = NSSize(width: 64, height: 64)
-            alert.icon = iconImage
-        }
-        
-        if let screen = NSScreen.main {
-            let window = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 100, height: 100),
-                styleMask: [],
-                backing: .buffered,
-                defer: true
-            )
+        DispatchQueue.main.async {
+            let alert = NSAlert()
+            alert.messageText = "倒计时结束"
+            alert.informativeText = "时间到了！"
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "确定")
             
-            let centerX = screen.frame.midX
-            let centerY = screen.frame.midY
+            if let iconImage = NSImage(systemSymbolName: "timer", accessibilityDescription: nil) {
+                iconImage.size = NSSize(width: 64, height: 64)
+                alert.icon = iconImage
+            }
             
-            window.setFrameOrigin(NSPoint(x: centerX - 50, y: centerY - 50))
+            // 在主线程中更新UI
+            AppDelegate.shared?.isCountdownRunning = false
             
             if alert.runModal() == .alertFirstButtonReturn {
-                NSApplication.shared.terminate(nil)
+                closeCountdownWindow()
             }
         }
     }
@@ -143,4 +137,4 @@ struct CountdownView: View {
 
 #Preview {
     CountdownView(totalSeconds: 3600, isAlwaysOnTop: false, isDarkMode: false)
-} 
+}
