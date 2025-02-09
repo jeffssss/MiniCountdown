@@ -11,6 +11,7 @@ struct CountdownView: View {
     @State private var isMouseInside: Bool = false
     @State private var showingAlert: Bool = false
     @State private var audioPlayer: AVAudioPlayer?
+    @State private var hostWindow: NSWindow?
     
     init(totalSeconds: Int, isAlwaysOnTop: Bool, isDarkMode: Bool) {
         self.totalSeconds = totalSeconds
@@ -38,7 +39,6 @@ struct CountdownView: View {
             // 关闭按钮
             if isMouseInside {
                 Button(action: {
-                    AppDelegate.shared?.isCountdownRunning = false
                     closeCountdownWindow()
                 }) {
                     Image(systemName: "xmark.circle.fill")
@@ -55,6 +55,12 @@ struct CountdownView: View {
         }
         .onAppear {
             startTimer()
+            // 保存窗口引用
+            if let window = NSApplication.shared.windows.first(where: { window in
+                return window.contentView is NSHostingView<CountdownView>
+            }) {
+                hostWindow = window
+            }
         }
         .onDisappear {
             timer?.invalidate()
@@ -81,13 +87,9 @@ struct CountdownView: View {
     
     private func closeCountdownWindow() {
         DispatchQueue.main.async {
-            if let windows = NSApplication.shared.windows.first(where: { window in
-                return window.contentView is NSHostingView<CountdownView>
-            }) {
-                // 先更新状态，再关闭窗口
-                AppDelegate.shared?.isCountdownRunning = false
-                windows.close()
-            }
+            // 先更新状态，再关闭窗口
+            AppDelegate.shared?.isCountdownRunning = false
+            hostWindow?.close()
         }
     }
     

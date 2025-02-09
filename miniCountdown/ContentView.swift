@@ -14,7 +14,6 @@ struct ContentView: View {
     @State private var seconds: String = "0"
     @State private var isAlwaysOnTop: Bool = true
     @State private var isDarkMode: Bool = false
-    @State private var showingCountdown: Bool = false
     
     private var totalSeconds: Int {
         (Int(hours) ?? 0) * 3600 + (Int(minutes) ?? 0) * 60 + (Int(seconds) ?? 0)
@@ -41,10 +40,8 @@ struct ContentView: View {
             
             Button(action: {
                 if totalSeconds > 0 {
-                    showingCountdown = true
-                    // 先打开倒计时窗口，再关闭主窗口
-                    openCountdownWindow()
                     hideMainWindow()
+                    openCountdownWindow()
                 }
             }) {
                 Text("开始倒计时")
@@ -63,11 +60,11 @@ struct ContentView: View {
     }
     
     private func hideMainWindow() {
-        if let window = NSApplication.shared.windows.first(where: { $0.contentView?.subviews.first is NSHostingView<ContentView> }) {
-            window.orderOut(nil)  // 改用 orderOut 而不是 close
+        if let appDelegate = AppDelegate.shared {
+            appDelegate.window.orderOut(nil)  // 使用AppDelegate中的window引用
             // 确保在窗口关闭后再设置状态
             DispatchQueue.main.async {
-                AppDelegate.shared?.isCountdownRunning = true
+                appDelegate.isCountdownRunning = true
             }
         }
     }
