@@ -11,6 +11,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		323CE1BD2D5A98D500AFF6D2 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		32C38BE62D095608004BA794 /* miniCountdown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = miniCountdown.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32C38BFC2D096E10004BA794 /* finish_sound.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = finish_sound.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -51,6 +52,7 @@
 			isa = PBXGroup;
 			children = (
 				32C38BFC2D096E10004BA794 /* finish_sound.wav */,
+				323CE1BD2D5A98D500AFF6D2 /* Package.swift */,
 				32C38BE82D095608004BA794 /* miniCountdown */,
 				32C38BE72D095608004BA794 /* Products */,
 			);
@@ -114,6 +116,8 @@
 			);
 			mainGroup = 32C38BDD2D095608004BA794;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 32C38BE72D095608004BA794 /* Products */;
 			projectDirPath = "";

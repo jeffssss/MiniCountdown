@@ -49,9 +49,8 @@ class RecordListViewModel: ObservableObject {
         case CountdownStatus.completed.rawValue:
             return "\(record.duration)秒"
         case CountdownStatus.interrupted.rawValue:
-            if let startTime = record.startTime,
-               let endTime = record.endTime {
-                let duration = Int(endTime.timeIntervalSince(startTime))
+            if let endTime = record.endTime {
+                let duration = Int(endTime.timeIntervalSince(record.startTime))
                 return "\(duration)秒"
             }
             return "--"
