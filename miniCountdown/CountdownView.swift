@@ -87,7 +87,9 @@ struct CountdownView: View {
     
     private func closeCountdownWindow() {
         DispatchQueue.main.async {
-            // 先更新状态，再关闭窗口
+            // 先停止计时器和更新状态，再关闭窗口
+            timer?.invalidate()
+            timer = nil
             AppDelegate.shared?.isCountdownRunning = false
             hostWindow?.close()
         }
