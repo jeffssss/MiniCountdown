@@ -85,6 +85,21 @@ class WorkMindManager {
         }
     }
     
+    // 分页获取记录
+    func getRecordsByPage(page: Int, pageSize: Int) -> [WorkMindRecord] {
+        let fetchRequest: NSFetchRequest<WorkMindRecord> = WorkMindRecord.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \WorkMindRecord.startTime, ascending: false)]
+        fetchRequest.fetchLimit = pageSize
+        fetchRequest.fetchOffset = page * pageSize
+        
+        do {
+            return try context.fetch(fetchRequest)
+        } catch {
+            print("加载记录失败: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
     // 获取指定时间范围内的记录
     func getRecords(from startDate: Date, to endDate: Date) -> [WorkMindRecord] {
         let request: NSFetchRequest<WorkMindRecord> = WorkMindRecord.fetchRequest()
