@@ -60,7 +60,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if !flag {
             window.makeKeyAndOrderFront(nil) // 重新显示窗口
         }
-        return true
+        return false
     }
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
