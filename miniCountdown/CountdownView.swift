@@ -1,5 +1,6 @@
 import SwiftUI
 import AVFoundation
+import CoreData
 
 struct CountdownView: View {
     let totalSeconds: Int
@@ -12,6 +13,7 @@ struct CountdownView: View {
     @State private var showingAlert: Bool = false
     @State private var audioPlayer: AVAudioPlayer?
     @State private var hostWindow: NSWindow?
+    @State private var currentRecord: WorkMindRecord?
     
     init(totalSeconds: Int, isAlwaysOnTop: Bool, isDarkMode: Bool) {
         self.totalSeconds = totalSeconds
@@ -39,7 +41,7 @@ struct CountdownView: View {
             // 关闭按钮
             if isMouseInside {
                 Button(action: {
-                    closeCountdownWindow()
+                    closeCountdownWindow(status: .interrupted)
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 16))
@@ -54,6 +56,8 @@ struct CountdownView: View {
             isMouseInside = hovering
         }
         .onAppear {
+            // 创建倒计时记录
+            currentRecord = WorkMindManager.shared.createRecord(duration: Int32(totalSeconds))
             startTimer()
             // 保存窗口引用
             if let window = NSApplication.shared.windows.first(where: { window in
@@ -64,6 +68,10 @@ struct CountdownView: View {
         }
         .onDisappear {
             timer?.invalidate()
+            // 如果倒计时还在进行中，则标记为中断
+            if remainingSeconds > 0, let record = currentRecord {
+                WorkMindManager.shared.updateRecord(record, status: .interrupted)
+            }
         }
     }
     
@@ -77,19 +85,24 @@ struct CountdownView: View {
             if remainingSeconds > 0 {
                 remainingSeconds -= 1
             } else {
-                timer?.invalidate()
-                closeCountdownWindow()
+                closeCountdownWindow(status: .completed)
                 playSound()
                 showCenteredAlert()
             }
         }
     }
     
-    private func closeCountdownWindow() {
+    private func closeCountdownWindow(status: CountdownStatus) {
         DispatchQueue.main.async {
             // 先停止计时器和更新状态，再关闭窗口
             timer?.invalidate()
             timer = nil
+            
+            // 更新WorkMindRecord状态
+            if let record = currentRecord {
+                WorkMindManager.shared.updateRecord(record, status: status)
+            }
+            
             AppDelegate.shared?.isCountdownRunning = false
             hostWindow?.close()
         }
@@ -122,12 +135,7 @@ struct CountdownView: View {
                 alert.icon = iconImage
             }
             
-            // 在主线程中更新UI
-            AppDelegate.shared?.isCountdownRunning = false
-            
-            if alert.runModal() == .alertFirstButtonReturn {
-                closeCountdownWindow()
-            }
+            alert.runModal()
         }
     }
     
