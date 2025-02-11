@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import CoreImage
 
 class ScreenshotManager {
     static let shared = ScreenshotManager()
@@ -94,8 +95,13 @@ class ScreenshotManager {
                 
                 if process.terminationStatus == 0 {
                     if let image = NSImage(contentsOfFile: fileURL.path) {
-                        try self.resizeImage(image).write(to: fileURL)
-                        print("截图已保存到: \(fileURL.path)")
+                        if let resizedImage = self.resizeImage(image: image, scaleFactor: 0.5),
+                           let tiffData = resizedImage.tiffRepresentation,
+                           let bitmapImage = NSBitmapImageRep(data: tiffData),
+                           let pngData = bitmapImage.representation(using: .png, properties: [:]) {
+                            try pngData.write(to: fileURL)
+                            print("截图已保存到: \(fileURL.path)")
+                        }
                     }
                 } else {
                     print("截图失败: 进程退出状态码 \(process.terminationStatus)")
@@ -106,26 +112,21 @@ class ScreenshotManager {
         }
     }
     
-    // 调整图片大小并转换为PNG数据
-    private func resizeImage(_ image: NSImage) -> Data {
-        let originalSize = image.size
-        let newSize = NSSize(width: originalSize.width * 0.5, height: originalSize.height * 0.5)
+    // 使用 CoreImage 调整图片大小
+    private func resizeImage(image: NSImage, scaleFactor: CGFloat) -> NSImage? {
+        let ciImage = CIImage(data: image.tiffRepresentation!)
+        let filter = CIFilter(name: "CIAffineTransform")
+        let transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+        filter?.setValue(ciImage, forKey: kCIInputImageKey)
+        filter?.setValue(transform, forKey: "inputTransform")
+
+        guard let outputImage = filter?.outputImage else { return nil }
         
-        let resizedImage = NSImage(size: newSize)
-        resizedImage.lockFocus()
-        image.draw(in: NSRect(origin: .zero, size: newSize),
-                  from: NSRect(origin: .zero, size: originalSize),
-                  operation: .copy,
-                  fraction: 1.0)
-        resizedImage.unlockFocus()
+        let rep = NSCIImageRep(ciImage: outputImage)
+        let resizedImage = NSImage(size: rep.size)
+        resizedImage.addRepresentation(rep)
         
-        guard let tiffData = resizedImage.tiffRepresentation,
-              let bitmapImage = NSBitmapImageRep(data: tiffData),
-              let pngData = bitmapImage.representation(using: .png, properties: [:]) else {
-            fatalError("无法转换图片格式")
-        }
-        
-        return pngData
+        return resizedImage
     }
     
     // 确保保存目录存在
