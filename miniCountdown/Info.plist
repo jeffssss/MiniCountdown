@@ -6,5 +6,10 @@
 	<false/>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2024 Feng Ji. All Rights Reserved.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

@@ -80,15 +80,18 @@ class ScreenshotManager {
     }
     
     // 执行截图
-    public func takeScreenshot() {
+    @discardableResult
+    public func takeScreenshot() -> NSImage? {
         do {
-            try withSecurityScope {
+            return try withSecurityScope {
                 let timestamp = Int(Date().timeIntervalSince1970)
-                let fileURL = URL(fileURLWithPath: savePath).appendingPathComponent("\(timestamp).png")
+                // 修改文件扩展名为 jpg
+                let fileURL = URL(fileURLWithPath: savePath).appendingPathComponent("\(timestamp).jpg")
                 
                 let process = Process()
                 process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
-                process.arguments = ["-x", fileURL.path] // -x 表示无声截图
+                // 添加 -t jpg 参数指定格式
+                process.arguments = ["-x", "-t", "jpg", fileURL.path]
                 
                 try process.run()
                 process.waitUntilExit()
@@ -98,17 +101,21 @@ class ScreenshotManager {
                         if let resizedImage = self.resizeImage(image: image, scaleFactor: 0.5),
                            let tiffData = resizedImage.tiffRepresentation,
                            let bitmapImage = NSBitmapImageRep(data: tiffData),
-                           let pngData = bitmapImage.representation(using: .png, properties: [:]) {
-                            try pngData.write(to: fileURL)
+                           // 修改保存格式为 jpeg
+                           let jpegData = bitmapImage.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) {
+                            try jpegData.write(to: fileURL)
                             print("截图已保存到: \(fileURL.path)")
+                            return resizedImage
                         }
                     }
                 } else {
                     print("截图失败: 进程退出状态码 \(process.terminationStatus)")
                 }
+                return nil
             }
         } catch {
             print("截图失败: \(error.localizedDescription)")
+            return nil
         }
     }
     

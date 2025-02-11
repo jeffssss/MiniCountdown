@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @State private var savePath: String = ScreenshotManager.shared.savePath
+    @State private var apiKey: String = UserDefaults.standard.string(forKey: "aiServiceApiKey") ?? ""
     @State private var showFolderPicker = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
@@ -20,6 +21,18 @@ struct SettingsView: View {
                     Button("选择文件夹") {
                         showFolderPicker = true
                     }
+                }
+                .padding(.vertical, 4)
+            }
+            
+            Section(header: Text("AI服务设置")) {
+                HStack {
+                    Text("API密钥：")
+                    SecureField("", text: $apiKey)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .onChange(of: apiKey) { newValue in
+                            UserDefaults.standard.set(newValue, forKey: "aiServiceApiKey")
+                        }
                 }
                 .padding(.vertical, 4)
             }
