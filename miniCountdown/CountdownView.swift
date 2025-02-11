@@ -81,9 +81,19 @@ struct CountdownView: View {
     }
     
     private func startTimer() {
+        let screenshotManager = ScreenshotManager.shared
+        var lastScreenshotTime = Date()
+        
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             if remainingSeconds > 0 {
                 remainingSeconds -= 1
+                
+                // 检查是否需要执行截图
+                let currentTime = Date()
+                if currentTime.timeIntervalSince(lastScreenshotTime) >= screenshotManager.interval {
+                    screenshotManager.takeScreenshot()
+                    lastScreenshotTime = currentTime
+                }
             } else {
                 closeCountdownWindow(status: .completed)
                 playSound()

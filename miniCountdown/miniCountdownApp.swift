@@ -92,6 +92,8 @@ struct miniCountdownApp: App {
             }
         }
         
-        Settings { }
+        Settings {
+            SettingsView()
+        }
     }
 }
