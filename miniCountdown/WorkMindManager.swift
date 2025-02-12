@@ -13,6 +13,46 @@ class WorkMindManager {
     private let container: NSPersistentContainer
     private let context: NSManagedObjectContext
     
+    // MARK: - 工作计划相关方法
+    
+    // 创建新的工作计划
+    func createWorkPlan(periodDays: Int, startDate: Date, targetHours: Float, workDays: Int) -> WorkPlanRecord? {
+        // 计算结束日期：开始日期增加periodDays天后减去1秒
+        guard let tempEndDate = Calendar.current.date(byAdding: .day, value: periodDays, to: startDate),
+              let endDate = Calendar.current.date(byAdding: .second, value: -1, to: tempEndDate) else {
+            return nil
+        }
+        
+        // 检查日期重叠
+        if WorkPlanRecord.hasOverlappingPlan(context: context, startDate: startDate, endDate: endDate) {
+            return nil
+        }
+        
+        // 创建新计划
+        let plan = WorkPlanRecord(context: context)
+        plan.id = UUID().uuidString
+        plan.periodDays = Int32(periodDays)
+        plan.startDate = Calendar.current.startOfDay(for: startDate)
+        plan.endDate = endDate
+        plan.targetHours = targetHours
+        plan.workDays = Int32(workDays)
+        plan.isActive = 0
+        
+        do {
+            try context.save()
+            print("保存工作计划: \(plan.id) \(plan.startDate ) \(plan.periodDays)天 \(plan.targetHours)H")
+            return plan
+        } catch {
+            print("保存工作计划失败: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    // 获取当前生效的工作计划
+    func getCurrentActivePlan() -> WorkPlanRecord? {
+        return WorkPlanRecord.getCurrentActivePlan(context: context)
+    }
+    
     private init() {
         container = NSPersistentContainer(name: "WorkMind")
         container.loadPersistentStores { description, error in
@@ -46,6 +86,11 @@ class WorkMindManager {
         record.duration = duration
         record.startTime = Date()
         record.status = CountdownStatus.running.rawValue
+        
+        // 检查并关联当前生效的工作计划
+        if let activePlan = getCurrentActivePlan() {
+            record.planId = activePlan.id
+        }
         
         do {
             try context.save()

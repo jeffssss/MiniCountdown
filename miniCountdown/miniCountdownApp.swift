@@ -12,6 +12,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var isCountdownRunning = false
     var window: NSWindow!
     var recordListWindow: NSWindow?
+    var workPlanWindow: NSWindow?
     
     @objc func openRecordList() {
         if let existingWindow = recordListWindow {
@@ -36,6 +37,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         newWindow.delegate = self
         newWindow.makeKeyAndOrderFront(nil)
         recordListWindow = newWindow
+    }
+    
+    @objc func openWorkPlan() {
+        if let existingWindow = workPlanWindow {
+            if existingWindow.isVisible {
+                existingWindow.orderOut(nil)
+            } else {
+                existingWindow.makeKeyAndOrderFront(nil)
+            }
+            return
+        }
+        
+        let workPlanView = WorkPlanView()
+        let newWindow = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 400),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        newWindow.contentView = NSHostingView(rootView: workPlanView)
+        newWindow.title = "创建工作计划"
+        newWindow.center()
+        newWindow.delegate = self
+        newWindow.makeKeyAndOrderFront(nil)
+        workPlanWindow = newWindow
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -84,11 +110,18 @@ struct miniCountdownApp: App {
         }
         .defaultSize(width: 500, height: 600)
         .commands {
-            CommandMenu("查看") {
+            CommandMenu("功能") {
                 Button("记录明细") {
                     NSApp.sendAction(#selector(AppDelegate.openRecordList), to: nil, from: nil)
                 }
                 .keyboardShortcut("l", modifiers: .command)
+                
+                Divider()
+                
+                Button("创建工作计划") {
+                    NSApp.sendAction(#selector(AppDelegate.openWorkPlan), to: nil, from: nil)
+                }
+                .keyboardShortcut("p", modifiers: .command)
             }
         }
         

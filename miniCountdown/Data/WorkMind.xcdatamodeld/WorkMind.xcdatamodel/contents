@@ -4,7 +4,17 @@
         <attribute name="duration" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="endTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="String"/>
+        <attribute name="planId" optional="YES" attributeType="String"/>
         <attribute name="startTime" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="status" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="WorkPlanRecord" representedClassName=".WorkPlanRecord" syncable="YES">
+        <attribute name="endDate" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="String"/>
+        <attribute name="isActive" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="periodDays" attributeType="Integer 32" defaultValueString="7" usesScalarValueType="YES"/>
+        <attribute name="startDate" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="targetHours" attributeType="Float" defaultValueString="40" usesScalarValueType="YES"/>
+        <attribute name="workDays" attributeType="Integer 32" defaultValueString="5" usesScalarValueType="YES"/>
     </entity>
 </model>

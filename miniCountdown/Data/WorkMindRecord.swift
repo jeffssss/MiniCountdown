@@ -18,5 +18,6 @@ final class WorkMindRecord : NSManagedObject {
     @NSManaged public var id: String
     @NSManaged public var startTime: Date
     @NSManaged public var status: Int16
+    @NSManaged public var planId: String
 
 }
