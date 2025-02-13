@@ -16,5 +16,6 @@
         <attribute name="startDate" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="targetHours" attributeType="Float" defaultValueString="40" usesScalarValueType="YES"/>
         <attribute name="workDays" attributeType="Integer 32" defaultValueString="5" usesScalarValueType="YES"/>
+        <attribute name="workDurationMinutes" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
     </entity>
 </model>

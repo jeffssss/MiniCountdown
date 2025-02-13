@@ -16,7 +16,7 @@ class WorkMindManager {
     // MARK: - 工作计划相关方法
     
     // 创建新的工作计划
-    func createWorkPlan(periodDays: Int, startDate: Date, targetHours: Float, workDays: Int) -> WorkPlanRecord? {
+    func createWorkPlan(periodDays: Int, startDate: Date, targetHours: Float, workDays: Int, workDurationMinutes: Int) -> WorkPlanRecord? {
         // 计算结束日期：开始日期增加periodDays天后减去1秒
         guard let tempEndDate = Calendar.current.date(byAdding: .day, value: periodDays, to: startDate),
               let endDate = Calendar.current.date(byAdding: .second, value: -1, to: tempEndDate) else {
@@ -36,6 +36,7 @@ class WorkMindManager {
         plan.endDate = endDate
         plan.targetHours = targetHours
         plan.workDays = Int32(workDays)
+        plan.workDurationMinutes = Int32(workDurationMinutes)
         plan.isActive = 0
         
         do {

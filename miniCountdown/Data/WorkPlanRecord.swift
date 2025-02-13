@@ -17,6 +17,7 @@ final class WorkPlanRecord : NSManagedObject {
     @NSManaged public var targetHours: Float
     @NSManaged public var workDays: Int32
     @NSManaged public var isActive: Int16
+    @NSManaged public var workDurationMinutes: Int32 // 单次工作时长（分钟）
     
     // 检查日期范围是否与其他计划重叠
     static func hasOverlappingPlan(context: NSManagedObjectContext, startDate: Date, endDate: Date) -> Bool {

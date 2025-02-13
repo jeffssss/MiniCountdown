@@ -7,6 +7,7 @@ struct WorkPlanView: View {
     @State private var startDate = Calendar.current.startOfDay(for: Date())
     @State private var targetHours: Float = 40
     @State private var workDays: Int = 5
+    @State private var workDurationMinutes: Int = 40
     @State private var showError = false
     @State private var showConfirmation = false
     @State private var showSuccess = false
@@ -76,6 +77,14 @@ struct WorkPlanView: View {
                     Text("天")
                 }
                 .padding(.vertical, 4)
+                
+                HStack {
+                    Text("单次工作时长：")
+                    TextField("", value: $workDurationMinutes, format: .number)
+                        .frame(width: 60)
+                    Text("分钟")
+                }
+                .padding(.vertical, 4)
             }
             
             HStack {
@@ -121,8 +130,14 @@ struct WorkPlanView: View {
     }
     
     private func createWorkPlan() {
-        if let plan = WorkMindManager.shared.createWorkPlan(periodDays: periodDays, startDate: startDate, targetHours: targetHours, workDays: workDays) {
+        if let plan = WorkMindManager.shared.createWorkPlan(periodDays: periodDays,
+                                                            startDate: startDate,
+                                                            targetHours: targetHours,
+                                                            workDays: workDays,
+                                                            workDurationMinutes:workDurationMinutes) {
             showSuccess = true
+            // 发送工作计划创建成功的通知
+            NotificationCenter.default.post(name: NSNotification.Name("WorkPlanCreated"), object: nil)
         } else {
             errorMessage = "创建工作计划失败，该时间段已存在其他计划"
             showError = true
