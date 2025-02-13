@@ -17,6 +17,17 @@ struct WorkPlanView: View {
         Calendar.current.date(byAdding: .second, value: (periodDays * 24 * 3600 - 1) , to: startDate) ?? startDate
     }
     
+    private var dailyWorkHours: Float {
+        guard workDays > 0 else { return 0 }
+        return targetHours / Float(workDays)
+    }
+    
+    private var estimatedDailyWorkTimes: Int {
+        guard workDurationMinutes > 0 else { return 0 }
+        let dailyMinutes = dailyWorkHours * 60
+        return Int(ceil(dailyMinutes / Float(workDurationMinutes)))
+    }
+    
     private var isInputValid: Bool {
         guard periodDays > 0 && periodDays <= 365 else {
             errorMessage = "工作周期必须在1-365天之间"
@@ -75,6 +86,8 @@ struct WorkPlanView: View {
                     TextField("", value: $workDays, format: .number)
                         .frame(width: 60)
                     Text("天")
+                    Text("（预计每日\(String(format: "%.2g", dailyWorkHours))小时）")
+                        .foregroundColor(.gray)
                 }
                 .padding(.vertical, 4)
                 
@@ -83,6 +96,8 @@ struct WorkPlanView: View {
                     TextField("", value: $workDurationMinutes, format: .number)
                         .frame(width: 60)
                     Text("分钟")
+                    Text("（预计每日\(estimatedDailyWorkTimes)次）")
+                        .foregroundColor(.gray)
                 }
                 .padding(.vertical, 4)
             }
