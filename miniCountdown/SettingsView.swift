@@ -15,10 +15,9 @@ struct SettingsView: View {
         Form {
             Section(header: Text("截图设置").bold()) {
                 HStack {
-                    Text("截图间隔（秒）：")
-                    TextField("", text: $screenshotInterval)
+                    TextField("截图间隔（秒）", text: $screenshotInterval)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(width: 80)
+                        .frame(width: 180)
                         .onChange(of: screenshotInterval) { oldValue, newValue in
                             if let interval = Int(newValue), interval > 0 {
                                 showIntervalError = false
@@ -36,10 +35,10 @@ struct SettingsView: View {
                 .padding(.vertical, 4)
                 
                 HStack {
-                    Text("保存路径：")
-                    Text(savePath)
+                    TextField("保存路径", text: $savePath)
                         .truncationMode(.middle)
                         .lineLimit(1)
+                        .disabled(true)
                     
                     Spacer()
                     
@@ -52,8 +51,7 @@ struct SettingsView: View {
             
             Section(header: Text("AI服务设置").bold()) {
                 HStack {
-                    Text("模型名称：")
-                    TextField("", text: $modelName)
+                    TextField("模型名称", text: $modelName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .onChange(of: modelName) { oldValue, newValue in
                             AIService.shared.modelName = newValue
@@ -62,8 +60,7 @@ struct SettingsView: View {
                 .padding(.vertical, 4)
                 
                 HStack {
-                    Text("API密钥：")
-                    TextField("", text: $apiKey)
+                    TextField("API密钥", text: $apiKey)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .onChange(of: apiKey) { oldValue, newValue in
                             UserDefaults.standard.set(newValue, forKey: "aiServiceApiKey")
@@ -71,14 +68,17 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 4)
                 
-                HStack {
-                    Text("分析提示词：")
+                HStack(alignment: .top) {
+                    
                     TextEditor(text: $inputPrompt)
                         .frame(height: 100)
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.2)))
                         .onChange(of: inputPrompt) { oldValue, newValue in
                             AIService.shared.inputPrompt = newValue
-                        }
+                        }.overlay(alignment: .topLeading, content: {
+                            Text("分析Prompt")
+                                .frame(width: 100, alignment: .leading).offset(CGSize(width: -80,height: 0))
+                        })
                 }
                 .padding(.vertical, 4)
             }
