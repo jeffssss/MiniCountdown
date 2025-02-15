@@ -30,16 +30,28 @@ class AIService {
         }
         
         let base64Image = jpegData.base64EncodedString()
+        let inputPrompt = "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
+        let modelName = "gpt-4o-mini"
+        let requestStartTime = Date()
+        var apiRecord: APIRequestRecord? = nil
+        
+        // 创建API请求记录
+        apiRecord = WorkMindManager.shared.createAPIRequestRecord(
+            requestTime: requestStartTime,
+            inputPrompt: inputPrompt,
+            modelName: modelName,
+            screenshotPath: "" // 这里可以添加截图保存逻辑
+        )
         
         let parameters: [String: Any] = [
-            "model": "gpt-4o-mini",
+            "model": modelName,
             "messages": [
                 [
                     "role": "user",
                     "content": [
                         [
                             "type": "text",
-                            "text": "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
+                            "text": inputPrompt
                         ],
                         [
                             "type": "image_url",
@@ -59,6 +71,9 @@ class AIService {
                    encoding: JSONEncoding.default,
                    headers: headers)
         .responseData { response in
+            let requestEndTime = Date()
+            let duration = Float(requestEndTime.timeIntervalSince(requestStartTime) * 1000) // 转换为毫秒
+            
             // 添加详细的错误信息打印
             if let error = response.error {
                 print("网络请求错误详情：")
@@ -73,6 +88,16 @@ class AIService {
                 print("AI请求response：\(String(data: data, encoding: .utf8) ?? "Unknown")")
                 do {
                     let json = try JSON(data: data)
+                    // 更新API请求记录
+                    if let record = apiRecord {
+                        WorkMindManager.shared.updateAPIRequestRecord(
+                            record,
+                            output: String(data: data, encoding: .utf8) ?? "Unknown",
+                            totalTokens: json["usage"]["total_tokens"].exists() ? json["usage"]["total_tokens"].int32Value : nil,
+                            requestDuration: duration
+                        )
+                    }
+                    
                     if let content = json["choices"].array?.first?["message"]["content"].string {
                         completion(content, nil)
                     } else {
@@ -84,6 +109,14 @@ class AIService {
                     completion(nil, error)
                 }
             case .failure(let error):
+                if let record = apiRecord {
+                    WorkMindManager.shared.updateAPIRequestRecord(
+                        record,
+                        output: error.localizedDescription,
+                        totalTokens: nil,
+                        requestDuration: duration
+                    )
+                }
                 completion(nil, error)
             }
         }

@@ -197,4 +197,52 @@ class WorkMindManager {
             print("清空记录失败: \(error.localizedDescription)")
         }
     }
+    
+    // MARK: - API请求记录相关方法
+    
+    // 分页获取API请求记录
+    func getAPIRequestRecords(page: Int, pageSize: Int) -> [APIRequestRecord] {
+        let fetchRequest = APIRequestRecord.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \APIRequestRecord.requestTime, ascending: false)]
+        fetchRequest.fetchLimit = pageSize
+        fetchRequest.fetchOffset = page * pageSize
+        
+        do {
+            return try context.fetch(fetchRequest)
+        } catch {
+            print("加载API请求记录失败: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    // 创建新的API请求记录
+    func createAPIRequestRecord(requestTime: Date, inputPrompt: String, modelName: String, screenshotPath: String) -> APIRequestRecord? {
+        let record = APIRequestRecord(context: context)
+        record.id = UUID()
+        record.requestTime = requestTime
+        record.inputPrompt = inputPrompt
+        record.modelName = modelName
+        record.screenshotPath = screenshotPath
+        
+        do {
+            try context.save()
+            return record
+        } catch {
+            print("创建API请求记录失败: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    // 更新API请求记录
+    func updateAPIRequestRecord(_ record: APIRequestRecord, output: String?, totalTokens: Int32?, requestDuration: Float) {
+        record.requestDuration = requestDuration
+        record.output = output ?? ""
+        record.totalTokens = totalTokens ?? 0
+        
+        do {
+            try context.save()
+        } catch {
+            print("更新API请求记录失败: \(error.localizedDescription)")
+        }
+    }
 }

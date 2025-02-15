@@ -75,6 +75,11 @@ struct miniCountdownApp: App {
                     openWindow(id: "workPlanList")
                 }
                 .keyboardShortcut("p", modifiers: .command)
+
+                Button("API请求记录") {
+                    openWindow(id: "apiRequestList")
+                }
+
                 Divider()
                 
                 Button("创建工作计划") {
@@ -97,6 +102,13 @@ struct miniCountdownApp: App {
         .defaultSize(width: 500, height: 600)
         .windowStyle(.titleBar)
         .windowResizability(.contentSize)
+
+        Window("API请求记录", id: "apiRequestList") {
+            APIRequestListView()
+        }
+        .defaultSize(width: 400, height: 400)
+        .windowStyle(.titleBar)
+        .windowResizability(.contentSize)
         
         Window("创建工作计划", id: "createWorkPlan") {
             WorkPlanView()
@@ -104,6 +116,8 @@ struct miniCountdownApp: App {
         .defaultSize(width: 400, height: 400)
         .windowStyle(.titleBar)
         .windowResizability(.contentSize)
+
+        
         
         Settings {
             SettingsView()
