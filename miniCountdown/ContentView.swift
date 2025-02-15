@@ -172,7 +172,7 @@ struct TimeInputField: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .frame(width: 60)
                 .multilineTextAlignment(.center)
-                .onChange(of: value) { newValue in
+                .onChange(of: value) { oldValue, newValue in
                     let filtered = newValue.filter { $0.isNumber }
                     if filtered != newValue {
                         value = filtered

@@ -5,7 +5,16 @@ import AppKit
 
 class AIService {
     static let shared = AIService()
+    private let userDefaults = UserDefaults.standard
     private let baseURL = "https://aihubmix.com/v1/chat/completions"
+    private let defaultModelName = "gpt-4o-mini"
+    private let modelNameKey = "aiServiceModelName"
+
+    var modelName: String {
+        get { userDefaults.string(forKey: modelNameKey) ?? defaultModelName }
+        set { userDefaults.set(newValue, forKey: modelNameKey) }
+    }
+    
     private var apiKey: String {
         return UserDefaults.standard.string(forKey: "aiServiceApiKey") ?? ""
     }
@@ -16,7 +25,7 @@ class AIService {
     
     private init() {}
     
-    func analyzeImage(image: NSImage, completion: @escaping (String?, Error?) -> Void) {
+    func analyzeImage(image: NSImage, screenshotPath: String, completion: @escaping (String?, Error?) -> Void) {
         let headers: HTTPHeaders = [
             "Authorization": "Bearer \(apiKey)",
             "Content-Type": "application/json"
@@ -31,7 +40,7 @@ class AIService {
         
         let base64Image = jpegData.base64EncodedString()
         let inputPrompt = "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
-        let modelName = "gpt-4o-mini"
+        let modelName = UserDefaults.standard.string(forKey: modelNameKey) ?? defaultModelName
         let requestStartTime = Date()
         var apiRecord: APIRequestRecord? = nil
         
@@ -40,7 +49,7 @@ class AIService {
             requestTime: requestStartTime,
             inputPrompt: inputPrompt,
             modelName: modelName,
-            screenshotPath: "" // 这里可以添加截图保存逻辑
+            screenshotPath: screenshotPath
         )
         
         let parameters: [String: Any] = [

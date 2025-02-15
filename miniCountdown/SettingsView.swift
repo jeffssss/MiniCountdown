@@ -3,6 +3,9 @@ import SwiftUI
 struct SettingsView: View {
     @State private var savePath: String = ScreenshotManager.shared.savePath
     @State private var apiKey: String = UserDefaults.standard.string(forKey: "aiServiceApiKey") ?? ""
+    @State private var screenshotInterval: String = String(Int(ScreenshotManager.shared.interval))
+    @State private var modelName: String = AIService.shared.modelName
+    @State private var showIntervalError = false
     @State private var showFolderPicker = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
@@ -10,6 +13,27 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section(header: Text("截图设置")) {
+                HStack {
+                    Text("截图间隔（秒）：")
+                    TextField("", text: $screenshotInterval)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .frame(width: 80)
+                        .onChange(of: screenshotInterval) { oldValue, newValue in
+                            if let interval = Int(newValue), interval > 0 {
+                                showIntervalError = false
+                                ScreenshotManager.shared.interval = TimeInterval(interval)
+                            } else {
+                                showIntervalError = true
+                            }
+                        }
+                    if showIntervalError {
+                        Text("请输入大于0的数字")
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
+                }
+                .padding(.vertical, 4)
+                
                 HStack {
                     Text("保存路径：")
                     Text(savePath)
@@ -27,10 +51,20 @@ struct SettingsView: View {
             
             Section(header: Text("AI服务设置")) {
                 HStack {
+                    Text("模型名称：")
+                    TextField("", text: $modelName)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .onChange(of: modelName) { oldValue, newValue in
+                            AIService.shared.modelName = newValue
+                        }
+                }
+                .padding(.vertical, 4)
+                
+                HStack {
                     Text("API密钥：")
                     SecureField("", text: $apiKey)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .onChange(of: apiKey) { newValue in
+                        .onChange(of: apiKey) { oldValue, newValue in
                             UserDefaults.standard.set(newValue, forKey: "aiServiceApiKey")
                         }
                 }

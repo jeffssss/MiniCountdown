@@ -81,7 +81,7 @@ class ScreenshotManager {
     
     // 执行截图
     @discardableResult
-    public func takeScreenshot() -> NSImage? {
+    public func takeScreenshot() -> (image: NSImage?, path: String?) {
         do {
             return try withSecurityScope {
                 let timestamp = Int(Date().timeIntervalSince1970)
@@ -105,17 +105,17 @@ class ScreenshotManager {
                            let jpegData = bitmapImage.representation(using: .jpeg, properties: [.compressionFactor: 0.7]) {
                             try jpegData.write(to: fileURL)
                             print("截图已保存到: \(fileURL.path)")
-                            return resizedImage
+                            return (resizedImage, fileURL.path)
                         }
                     }
                 } else {
                     print("截图失败: 进程退出状态码 \(process.terminationStatus)")
                 }
-                return nil
+                return (nil, nil)
             }
         } catch {
             print("截图失败: \(error.localizedDescription)")
-            return nil
+            return (nil, nil)
         }
     }
     

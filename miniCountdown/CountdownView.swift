@@ -92,8 +92,9 @@ struct CountdownView: View {
                 let currentTime = Date()
                 if currentTime.timeIntervalSince(lastScreenshotTime) >= screenshotManager.interval {
                     if AIService.shared.hasApiKey() {
-                        if let image = screenshotManager.takeScreenshot() {
-                            AIService.shared.analyzeImage(image: image) { result, error in
+                        let screenshot = screenshotManager.takeScreenshot()
+                        if let image = screenshot.image, let screenshotPath = screenshot.path {
+                            AIService.shared.analyzeImage(image: image, screenshotPath: screenshotPath) { result, error in
                                 if let error = error {
                                     print("AI分析失败: \(error.localizedDescription)")
                                 } else if let result = result {
