@@ -53,6 +53,9 @@ struct WorkPlanListView: View {
         }
         .listStyle(InsetListStyle())
         .navigationTitle("工作计划")
+        .onAppear {
+            viewModel.refresh()
+        }
     }
 }
 

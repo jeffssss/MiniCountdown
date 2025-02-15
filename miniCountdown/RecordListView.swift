@@ -60,6 +60,9 @@ struct RecordListView: View {
         }
         .listStyle(InsetListStyle())
         .navigationTitle("记录明细")
+        .onAppear {
+            viewModel.refresh()
+        }
     }
 }
 

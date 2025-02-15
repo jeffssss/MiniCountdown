@@ -11,6 +11,13 @@ class RecordListViewModel: ObservableObject {
         loadNextPage()
     }
     
+    func refresh() {
+        records = []
+        currentPage = 0
+        hasMoreData = true
+        loadNextPage()
+    }
+    
     func loadNextPage() {
         guard hasMoreData else { return }
         

@@ -18,6 +18,10 @@ class WorkPlanListViewModel: ObservableObject {
         currentPage = 0
     }
     
+    func refresh() {
+        loadPlans()
+    }
+    
     func loadNextPage() {
         currentPage += 1
         let newPlans = WorkMindManager.shared.getWorkPlans(page: currentPage, pageSize: pageSize)
