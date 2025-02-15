@@ -21,11 +21,13 @@ struct APIRequestItemView: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .lineLimit(2)
+                .help(record.inputPrompt)
             
             Text("输出: " + (record.output ?? ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .lineLimit(2)
+                .help(record.output ?? "")
             
             HStack(spacing: 12) {
                 Label("耗时: " + viewModel.formatDuration(record.requestDuration), systemImage: "clock")
@@ -37,6 +39,15 @@ struct APIRequestItemView: View {
                 Label("Token: " + viewModel.formatTokens(record.totalTokens), systemImage: "number")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                
+                Button(action: {
+                    NSWorkspace.shared.selectFile(record.screenshotPath, inFileViewerRootedAtPath: "")
+                }) {
+                    Image(systemName: "photo")
+                        .foregroundColor(.blue)
+                }
+                .help("在 Finder 中打开图片")
+                .disabled(record.screenshotPath.isEmpty)
             }
         }
         .padding(.vertical, 8)
@@ -59,6 +70,9 @@ struct APIRequestListView: View {
         }
         .listStyle(InsetListStyle())
         .navigationTitle("AI请求记录")
+        .onAppear {
+            viewModel.refresh()
+        }
     }
 }
 

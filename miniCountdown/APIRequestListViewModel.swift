@@ -12,6 +12,10 @@ class APIRequestListViewModel: ObservableObject {
         loadRecords()
     }
     
+    func refresh() {
+        loadRecords()
+    }
+    
     func loadRecords() {
         let fetchRequest = APIRequestRecord.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \APIRequestRecord.requestTime, ascending: false)]
