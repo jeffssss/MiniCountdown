@@ -9,8 +9,10 @@ class AIService {
     private let baseURL = "https://aihubmix.com/v1/chat/completions"
     private let defaultModelName = "gpt-4o-mini"
     private let modelNameKey = "aiServiceModelName"
+    
     private let defaultInputPrompt = "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
     private let inputPromptKey = "aiServiceInputPrompt"
+    private let systemPromptKey = "aiServiceSystemPrompt"
 
     var modelName: String {
         get { userDefaults.string(forKey: modelNameKey) ?? defaultModelName }
@@ -20,6 +22,11 @@ class AIService {
     var inputPrompt: String {
         get { userDefaults.string(forKey: inputPromptKey) ?? defaultInputPrompt }
         set { userDefaults.set(newValue, forKey: inputPromptKey) }
+    }
+    
+    var systemPrompt: String {
+        get { userDefaults.string(forKey: systemPromptKey) ?? "" }
+        set { userDefaults.set(newValue, forKey: systemPromptKey) }
     }
     
     private var apiKey: String {
@@ -46,7 +53,6 @@ class AIService {
         }
         
         let base64Image = jpegData.base64EncodedString()
-        let inputPrompt = self.inputPrompt
         let modelName = UserDefaults.standard.string(forKey: modelNameKey) ?? defaultModelName
         let requestStartTime = Date()
         var apiRecord: APIRequestRecord? = nil
@@ -54,7 +60,7 @@ class AIService {
         // 创建API请求记录
         apiRecord = WorkMindManager.shared.createAPIRequestRecord(
             requestTime: requestStartTime,
-            inputPrompt: inputPrompt,
+            inputPrompt: self.inputPrompt + "\n" + self.systemPrompt,
             modelName: modelName,
             screenshotPath: screenshotPath
         )
@@ -67,7 +73,7 @@ class AIService {
                     "content": [
                         [
                             "type": "text",
-                            "text": inputPrompt
+                            "text": self.inputPrompt
                         ],
                         [
                             "type": "image_url",
@@ -77,6 +83,10 @@ class AIService {
                             ]
                         ]
                     ]
+                ],
+                [
+                    "role": "developer",
+                    "content": self.systemPrompt
                 ]
             ],
         ]

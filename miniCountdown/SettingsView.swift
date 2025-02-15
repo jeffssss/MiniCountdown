@@ -6,6 +6,8 @@ struct SettingsView: View {
     @State private var screenshotInterval: String = String(Int(ScreenshotManager.shared.interval))
     @State private var modelName: String = AIService.shared.modelName
     @State private var inputPrompt: String = AIService.shared.inputPrompt
+    @State private var systemPrompt: String = AIService.shared.systemPrompt
+
     @State private var showIntervalError = false
     @State private var showFolderPicker = false
     @State private var showErrorAlert = false
@@ -70,13 +72,27 @@ struct SettingsView: View {
                 
                 HStack(alignment: .top) {
                     
+                    TextEditor(text: $systemPrompt)
+                        .frame(height: 60)
+                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.2)))
+                        .onChange(of: systemPrompt) { oldValue, newValue in
+                            AIService.shared.systemPrompt = newValue
+                        }.overlay(alignment: .topLeading, content: {
+                            Text("系统Prompt")
+                                .frame(width: 100, alignment: .leading).offset(CGSize(width: -80,height: 0))
+                        })
+                }
+                .padding(.vertical, 4)
+                
+                HStack(alignment: .top) {
+                    
                     TextEditor(text: $inputPrompt)
-                        .frame(height: 100)
+                        .frame(height: 60)
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.2)))
                         .onChange(of: inputPrompt) { oldValue, newValue in
                             AIService.shared.inputPrompt = newValue
                         }.overlay(alignment: .topLeading, content: {
-                            Text("分析Prompt")
+                            Text("输入Prompt")
                                 .frame(width: 100, alignment: .leading).offset(CGSize(width: -80,height: 0))
                         })
                 }
