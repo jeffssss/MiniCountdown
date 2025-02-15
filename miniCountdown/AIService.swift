@@ -9,10 +9,17 @@ class AIService {
     private let baseURL = "https://aihubmix.com/v1/chat/completions"
     private let defaultModelName = "gpt-4o-mini"
     private let modelNameKey = "aiServiceModelName"
+    private let defaultInputPrompt = "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
+    private let inputPromptKey = "aiServiceInputPrompt"
 
     var modelName: String {
         get { userDefaults.string(forKey: modelNameKey) ?? defaultModelName }
         set { userDefaults.set(newValue, forKey: modelNameKey) }
+    }
+    
+    var inputPrompt: String {
+        get { userDefaults.string(forKey: inputPromptKey) ?? defaultInputPrompt }
+        set { userDefaults.set(newValue, forKey: inputPromptKey) }
     }
     
     private var apiKey: String {
@@ -39,7 +46,7 @@ class AIService {
         }
         
         let base64Image = jpegData.base64EncodedString()
-        let inputPrompt = "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
+        let inputPrompt = self.inputPrompt
         let modelName = UserDefaults.standard.string(forKey: modelNameKey) ?? defaultModelName
         let requestStartTime = Date()
         var apiRecord: APIRequestRecord? = nil

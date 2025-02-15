@@ -5,6 +5,7 @@ struct SettingsView: View {
     @State private var apiKey: String = UserDefaults.standard.string(forKey: "aiServiceApiKey") ?? ""
     @State private var screenshotInterval: String = String(Int(ScreenshotManager.shared.interval))
     @State private var modelName: String = AIService.shared.modelName
+    @State private var inputPrompt: String = AIService.shared.inputPrompt
     @State private var showIntervalError = false
     @State private var showFolderPicker = false
     @State private var showErrorAlert = false
@@ -12,7 +13,7 @@ struct SettingsView: View {
     
     var body: some View {
         Form {
-            Section(header: Text("截图设置")) {
+            Section(header: Text("截图设置").bold()) {
                 HStack {
                     Text("截图间隔（秒）：")
                     TextField("", text: $screenshotInterval)
@@ -49,7 +50,7 @@ struct SettingsView: View {
                 .padding(.vertical, 4)
             }
             
-            Section(header: Text("AI服务设置")) {
+            Section(header: Text("AI服务设置").bold()) {
                 HStack {
                     Text("模型名称：")
                     TextField("", text: $modelName)
@@ -62,17 +63,28 @@ struct SettingsView: View {
                 
                 HStack {
                     Text("API密钥：")
-                    SecureField("", text: $apiKey)
+                    TextField("", text: $apiKey)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .onChange(of: apiKey) { oldValue, newValue in
                             UserDefaults.standard.set(newValue, forKey: "aiServiceApiKey")
                         }
                 }
                 .padding(.vertical, 4)
+                
+                HStack {
+                    Text("分析提示词：")
+                    TextEditor(text: $inputPrompt)
+                        .frame(height: 100)
+                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.2)))
+                        .onChange(of: inputPrompt) { oldValue, newValue in
+                            AIService.shared.inputPrompt = newValue
+                        }
+                }
+                .padding(.vertical, 4)
             }
         }
         .padding(20)
-        .frame(width: 500, height: 300)
+        .frame(width: 500, height: 450)
         .alert("错误", isPresented: $showErrorAlert) {
             Button("确定", role: .cancel) {}
         } message: {
