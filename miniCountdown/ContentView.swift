@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var isDarkMode: Bool = false
     @State private var currentPlan: WorkPlanRecord? = nil
     @State private var todayCompletedMinutes: Int = 0
+    @State private var showWorkPlanList: Bool = true
     
     private var totalSeconds: Int {
         (Int(hours) ?? 0) * 3600 + (Int(minutes) ?? 0) * 60 + (Int(seconds) ?? 0)
@@ -94,6 +95,7 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeMainNotification)) { _ in
             updatePlanInfo(false)
         }
+
     }
 
     private func updatePlanInfo(_ modifyCountdown:Bool = true) {

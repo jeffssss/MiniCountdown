@@ -54,6 +54,21 @@ class WorkMindManager {
         return WorkPlanRecord.getCurrentActivePlan(context: context)
     }
     
+    // 分页获取工作计划列表
+    func getWorkPlans(page: Int, pageSize: Int) -> [WorkPlanRecord] {
+        let request: NSFetchRequest<WorkPlanRecord> = WorkPlanRecord.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \WorkPlanRecord.startDate, ascending: false)]
+        request.fetchLimit = pageSize
+        request.fetchOffset = page * pageSize
+        
+        do {
+            return try context.fetch(request)
+        } catch {
+            print("分页加载工作计划失败: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
     private init() {
         container = NSPersistentContainer(name: "WorkMind")
         container.loadPersistentStores { description, error in
