@@ -13,7 +13,7 @@ class AIService {
     private let defaultInputPrompt = "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
     private let inputPromptKey = "aiServiceInputPrompt"
     private let systemPromptKey = "aiServiceSystemPrompt"
-
+    
     var modelName: String {
         get { userDefaults.string(forKey: modelNameKey) ?? defaultModelName }
         set { userDefaults.set(newValue, forKey: modelNameKey) }
@@ -65,31 +65,7 @@ class AIService {
             screenshotPath: screenshotPath
         )
         
-        let parameters: [String: Any] = [
-            "model": modelName,
-            "messages": [
-                [
-                    "role": "user",
-                    "content": [
-                        [
-                            "type": "text",
-                            "text": self.inputPrompt
-                        ],
-                        [
-                            "type": "image_url",
-                            "image_url": [
-                                "url": "data:image/jpeg;base64,\(base64Image)",
-                                "detail": "low"
-                            ]
-                        ]
-                    ]
-                ],
-                [
-                    "role": "developer",
-                    "content": self.systemPrompt
-                ]
-            ],
-        ]
+        let parameters = getRequestParam(modelName: modelName, base64Image: base64Image)
         
         AF.request(baseURL,
                    method: .post,
@@ -124,12 +100,17 @@ class AIService {
                         )
                     }
                     
-                    if let content = json["choices"].array?.first?["message"]["content"].string {
+                    if var content = json["choices"].array?.first?["message"]["content"].string {
+                        // 移除可能存在的 Markdown 代码块标记
+                        if content.hasPrefix("```json") && content.hasSuffix("```") {
+                            content = content.replacingOccurrences(of: "```json", with: "")
+                            content = content.replacingOccurrences(of: "```", with: "")
+                        }
                         completion(content, nil)
                     } else {
                         completion(nil, NSError(domain: "AIService",
-                                               code: -1,
-                                               userInfo: [NSLocalizedDescriptionKey: "解析响应失败"]))
+                                                code: -1,
+                                                userInfo: [NSLocalizedDescriptionKey: "解析响应失败"]))
                     }
                 } catch {
                     completion(nil, error)
@@ -146,5 +127,57 @@ class AIService {
                 completion(nil, error)
             }
         }
+    }
+    
+    func getRequestParam(modelName:String, base64Image: String) -> [String: Any] {
+        if modelName.contains("gemini") {
+            //TODO: gemini的模型，看如何支持系统prompt
+            return [
+                "model": modelName,
+                "messages": [
+                    [
+                        "role": "user",
+                        "content": [
+                            [
+                                "type": "text",
+                                "text": self.systemPrompt + "\n" + self.inputPrompt
+                            ],
+                            [
+                                "type": "image_url",
+                                "image_url": [
+                                    "url": "data:image/jpeg;base64,\(base64Image)",
+                                    "detail": "low"
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+            ]
+        }
+        return  [
+            "model": modelName,
+            "messages": [
+                [
+                    "role": "user",
+                    "content": [
+                        [
+                            "type": "text",
+                            "text": self.inputPrompt
+                        ],
+                        [
+                            "type": "image_url",
+                            "image_url": [
+                                "url": "data:image/jpeg;base64,\(base64Image)",
+                                "detail": "low"
+                            ]
+                        ]
+                    ]
+                ],
+                [
+                    "role": "developer",
+                    "content": self.systemPrompt
+                ]
+            ],
+        ]
     }
 }

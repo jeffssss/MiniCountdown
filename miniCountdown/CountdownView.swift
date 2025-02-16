@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import CoreData
+import SwiftyJSON
 
 struct CountdownView: View {
     let totalSeconds: Int
@@ -83,15 +84,22 @@ struct CountdownView: View {
     private func startTimer() {
         let screenshotManager = ScreenshotManager.shared
         var lastScreenshotTime = Date()
+        let startTime = Date()  // 记录开始时间
         
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
+            let currentTime = Date()
+            //更新倒计时
+            let elapsedSeconds = Int(currentTime.timeIntervalSince(startTime))
+            remainingSeconds = max(totalSeconds - elapsedSeconds, 0)
+            
             if remainingSeconds > 0 {
-                remainingSeconds -= 1
-                
                 // 检查是否需要执行截图
-                let currentTime = Date()
-                if currentTime.timeIntervalSince(lastScreenshotTime) >= screenshotManager.interval {
+                if currentTime.timeIntervalSince(lastScreenshotTime)
+                    >= screenshotManager.interval {
+                    lastScreenshotTime = currentTime
+                    
                     if AIService.shared.hasApiKey() {
+                        print("处理截图和识别逻辑")
                         let screenshot = screenshotManager.takeScreenshot()
                         if let image = screenshot.image, let screenshotPath = screenshot.path {
                             AIService.shared.analyzeImage(image: image, screenshotPath: screenshotPath) { result, error in
@@ -99,11 +107,27 @@ struct CountdownView: View {
                                     print("AI分析失败: \(error.localizedDescription)")
                                 } else if let result = result {
                                     print("AI分析结果: \(result)")
+                                    if let jsonData = result.data(using: .utf8),
+                                       let json = try? JSON(data: jsonData) {
+                                        if !json["isWorking"].boolValue {
+                                            DispatchQueue.main.async {
+                                                alertSound()
+                                                let alert = NSAlert()
+                                                alert.messageText = json["alert"].stringValue
+                                                alert.informativeText = json["reason"].stringValue
+                                                alert.alertStyle = .warning
+                                                alert.addButton(withTitle: "确定")
+                                                // 获取 alert 窗口并设置其属性
+                                                alert.window.level = .floating
+                                                NSApp.activate(ignoringOtherApps: true)
+                                                alert.runModal()
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                    lastScreenshotTime = currentTime
                 }
             } else {
                 closeCountdownWindow(status: .completed)
@@ -131,6 +155,20 @@ struct CountdownView: View {
     
     private func playSound() {
         if let soundURL = Bundle.main.url(forResource: "finish_sound", withExtension: "wav") {
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+                audioPlayer?.prepareToPlay()
+                audioPlayer?.play()
+            } catch {
+                NSSound.beep()
+            }
+        } else {
+            NSSound.beep()
+        }
+    }
+    
+    private func alertSound(){
+        if let soundURL = Bundle.main.url(forResource: "not_working_alert", withExtension: "wav") {
             do {
                 audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
                 audioPlayer?.prepareToPlay()

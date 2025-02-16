@@ -10,11 +10,13 @@
 		323CE2C12D5BD24200AFF6D2 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 323CE2C02D5BD24200AFF6D2 /* Alamofire */; };
 		323CE2C42D5BD25200AFF6D2 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 323CE2C32D5BD25200AFF6D2 /* SwiftyJSON */; };
 		32C38BFD2D096E10004BA794 /* finish_sound.wav in Resources */ = {isa = PBXBuildFile; fileRef = 32C38BFC2D096E10004BA794 /* finish_sound.wav */; };
+		32EDE21F2D6243F8005851D7 /* not_working_alert.wav in Resources */ = {isa = PBXBuildFile; fileRef = 32EDE21E2D6243F8005851D7 /* not_working_alert.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		32C38BE62D095608004BA794 /* miniCountdown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = miniCountdown.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32C38BFC2D096E10004BA794 /* finish_sound.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = finish_sound.wav; sourceTree = "<group>"; };
+		32EDE21E2D6243F8005851D7 /* not_working_alert.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = not_working_alert.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -54,6 +56,7 @@
 		32C38BDD2D095608004BA794 = {
 			isa = PBXGroup;
 			children = (
+				32EDE21E2D6243F8005851D7 /* not_working_alert.wav */,
 				32C38BFC2D096E10004BA794 /* finish_sound.wav */,
 				32C38BE82D095608004BA794 /* miniCountdown */,
 				32C38BE72D095608004BA794 /* Products */,
@@ -139,6 +142,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				32EDE21F2D6243F8005851D7 /* not_working_alert.wav in Resources */,
 				32C38BFD2D096E10004BA794 /* finish_sound.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

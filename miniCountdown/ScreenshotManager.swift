@@ -91,7 +91,7 @@ class ScreenshotManager {
                 let process = Process()
                 process.executableURL = URL(fileURLWithPath: "/usr/sbin/screencapture")
                 // 添加 -t jpg 参数指定格式
-                process.arguments = ["-x", "-t", "jpg", fileURL.path]
+                process.arguments = ["-m", "-x", "-t", "jpg", fileURL.path]
                 
                 try process.run()
                 process.waitUntilExit()
