@@ -83,20 +83,21 @@ struct CountdownView: View {
     
     private func startTimer() {
         let screenshotManager = ScreenshotManager.shared
-        var lastScreenshotTime = Date()
+        var lastScreenshotTimeSinceStart : TimeInterval = 0
         let startTime = Date()  // 记录开始时间
+        var compensateTime = 0 // 补偿的时间
         
-        timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
             let currentTime = Date()
             //更新倒计时
             let elapsedSeconds = Int(currentTime.timeIntervalSince(startTime))
-            remainingSeconds = max(totalSeconds - elapsedSeconds, 0)
+            remainingSeconds = max(totalSeconds + compensateTime - elapsedSeconds, 0)
             
             if remainingSeconds > 0 {
                 // 检查是否需要执行截图
-                if currentTime.timeIntervalSince(lastScreenshotTime)
-                    >= screenshotManager.interval {
-                    lastScreenshotTime = currentTime
+                let timeSinceStart = currentTime.timeIntervalSince(startTime) - Double(compensateTime)
+                if timeSinceStart - lastScreenshotTimeSinceStart >= screenshotManager.interval {
+                    lastScreenshotTimeSinceStart = timeSinceStart
                     
                     if AIService.shared.hasApiKey() {
                         print("处理截图和识别逻辑")
@@ -120,7 +121,16 @@ struct CountdownView: View {
                                                 // 获取 alert 窗口并设置其属性
                                                 alert.window.level = .floating
                                                 NSApp.activate(ignoringOtherApps: true)
-                                                alert.runModal()
+                                                
+                                                // 处理按钮点击回调
+                                                let alertTime = Date()
+                                                let response = alert.runModal()
+                                                if response == .alertFirstButtonReturn {
+                                                    let confirmTime = Date()
+                                                    let confirmDelay = Int(confirmTime.timeIntervalSince(alertTime))
+                                                    compensateTime += confirmDelay
+                                                    print("用户确认了警告信息,耗时为\(confirmDelay),会补充至compensateTime=\(compensateTime)")
+                                                }
                                             }
                                         }
                                     }
