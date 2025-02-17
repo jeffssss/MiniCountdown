@@ -7,6 +7,8 @@ struct SettingsView: View {
     @State private var modelName: String = AIService.shared.modelName
     @State private var inputPrompt: String = AIService.shared.inputPrompt
     @State private var systemPrompt: String = AIService.shared.systemPrompt
+    @State private var apiChannel: APIChannel = AIService.shared.aiChannel
+    @State private var apiEndpoint: String = AIService.shared.apiEndpoint
 
     @State private var showIntervalError = false
     @State private var showFolderPicker = false
@@ -52,6 +54,16 @@ struct SettingsView: View {
             }
             
             Section(header: Text("AI服务设置").bold()) {
+                Picker("API通道", selection: $apiChannel) {
+                    Text(APIChannel.ollama.displayName).tag(APIChannel.ollama)
+                    Text(APIChannel.aiHubMix.displayName).tag(APIChannel.aiHubMix)
+                    Text(APIChannel.openAI.displayName).tag(APIChannel.openAI)
+                }
+                .onChange(of: apiChannel) { oldValue, newValue in
+                    AIService.shared.aiChannel = newValue
+                }
+                .padding(.vertical, 4)
+                
                 HStack {
                     TextField("模型名称", text: $modelName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -61,17 +73,29 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 4)
                 
-                HStack {
-                    TextField("API密钥", text: $apiKey)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .onChange(of: apiKey) { oldValue, newValue in
-                            UserDefaults.standard.set(newValue, forKey: "aiServiceApiKey")
-                        }
+                if apiChannel == .aiHubMix || apiChannel == .openAI {
+                    HStack {
+                        TextField("API密钥", text: $apiKey)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: apiKey) { oldValue, newValue in
+                                AIService.shared.apiKey = newValue
+                            }
+                    }
+                    .padding(.vertical, 4)
+                } else if apiChannel == .ollama {
+                    HStack {
+                        TextField("API域名", text: $apiEndpoint)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .onChange(of: apiEndpoint) { oldValue, newValue in
+                                AIService.shared.apiEndpoint = newValue
+                            }
+                    }
+                    .padding(.vertical, 4)
                 }
-                .padding(.vertical, 4)
-                
+            }
+
+            Section(header: Text("提示词设置").bold()) {
                 HStack(alignment: .top) {
-                    
                     TextEditor(text: $systemPrompt)
                         .frame(height: 60)
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.2)))
@@ -85,7 +109,6 @@ struct SettingsView: View {
                 .padding(.vertical, 4)
                 
                 HStack(alignment: .top) {
-                    
                     TextEditor(text: $inputPrompt)
                         .frame(height: 60)
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.2)))
@@ -98,6 +121,7 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 4)
             }
+
         }
         .padding(20)
         .frame(width: 500, height: 450)

@@ -10,9 +10,14 @@ class AIService {
     private let defaultModelName = "gpt-4o-mini"
     private let modelNameKey = "aiServiceModelName"
     
+    private let apiKeyKey = "aiServiceApiKey"
+    
     private let defaultInputPrompt = "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
     private let inputPromptKey = "aiServiceInputPrompt"
     private let systemPromptKey = "aiServiceSystemPrompt"
+
+    private let apiChanelKey = "aiServiceChannel"
+    private let apiEndpointKey = "aiServiceEndpoint"
     
     var modelName: String {
         get { userDefaults.string(forKey: modelNameKey) ?? defaultModelName }
@@ -28,9 +33,20 @@ class AIService {
         get { userDefaults.string(forKey: systemPromptKey) ?? "" }
         set { userDefaults.set(newValue, forKey: systemPromptKey) }
     }
-    
-    private var apiKey: String {
-        return UserDefaults.standard.string(forKey: "aiServiceApiKey") ?? ""
+
+    var aiChannel: APIChannel {
+        get { APIChannel(rawValue: userDefaults.integer(forKey: apiChanelKey)) ?? .ollama}
+        set { userDefaults.set(newValue.rawValue, forKey: apiChanelKey) }
+    }
+
+    var apiEndpoint: String {
+        get { userDefaults.string(forKey: apiEndpointKey) ?? "http://localhost:11434" }
+        set { userDefaults.set(newValue, forKey: apiEndpointKey) }
+    }
+
+    var apiKey : String{
+        get { userDefaults.string(forKey: apiKeyKey) ?? "" }
+        set { userDefaults.set(newValue, forKey: apiKeyKey) }
     }
     
     func hasApiKey() -> Bool {
