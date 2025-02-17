@@ -6,9 +6,19 @@ import AppKit
 class AIService {
     static let shared = AIService()
     private let userDefaults = UserDefaults.standard
-    private let baseURL = "https://aihubmix.com/v1/chat/completions"
     private let defaultModelName = "gpt-4o-mini"
     private let modelNameKey = "aiServiceModelName"
+    
+    private var baseURL: String {
+        switch aiChannel {
+        case .ollama:
+            return apiEndpoint + "/api/chat"
+        case .aiHubMix:
+            return "https://aihubmix.com/v1/chat/completions"
+        case .openAI:
+            return "https://api.openai.com/v1/chat/completions"
+        }
+    }
     
     private let apiKeyKey = "aiServiceApiKey"
     
@@ -82,7 +92,7 @@ class AIService {
         )
         
         let parameters = getRequestParam(modelName: modelName, base64Image: base64Image)
-        
+//        print("参数:\(parameters)")
         AF.request(baseURL,
                    method: .post,
                    parameters: parameters,
@@ -146,30 +156,73 @@ class AIService {
     }
     
     func getRequestParam(modelName:String, base64Image: String) -> [String: Any] {
-        return  [
-            "model": modelName,
-            "messages": [
-                [
-                    "role": "user",
-                    "content": [
-                        [
-                            "type": "text",
-                            "text": self.inputPrompt
-                        ],
-                        [
-                            "type": "image_url",
-                            "image_url": [
-                                "url": "data:image/jpeg;base64,\(base64Image)",
-                                "detail": "low"
+        switch aiChannel{
+        case .aiHubMix,.openAI:
+            return  [
+                "model": modelName,
+                "messages": [
+                    [
+                        "role": "user",
+                        "content": [
+                            [
+                                "type": "text",
+                                "text": self.inputPrompt
+                            ],
+                            [
+                                "type": "image_url",
+                                "image_url": [
+                                    "url": "data:image/jpeg;base64,\(base64Image)",
+                                    "detail": "low"
+                                ]
                             ]
                         ]
+                    ],
+                    [
+                        "role": "system",
+                        "content": self.systemPrompt
                     ]
                 ],
-                [
-                    "role": "system",
-                    "content": self.systemPrompt
-                ]
-            ],
-        ]
+            ]
+        case .ollama:
+            return  [
+                "model": modelName,
+                "messages":[
+                    [
+                        "role": "system",
+                        "content": "请用json输出,如果我没有给你图片，请你也用json的方式告知我没有图片",
+                    ],
+                    [
+                        "role": "user",
+                        "content": "请描述图里的内容，不要编造",
+                        "images": [base64Image],
+                    ]
+                ],
+                "stream": false,
+                "format": "json",
+//                "format": [
+//                    "type": "object",
+//                    "properties": [
+//                        "score":[
+//                            "type": "integer"
+//                        ],
+//                        "isWorking":[
+//                            "type": "boolean"
+//                        ],
+//                        "threshold":[
+//                            "type": "integer"
+//                        ],
+//                        "desc":[
+//                            "type": "string"
+//                        ],
+//                        "reason":[
+//                            "type": "string"
+//                        ],
+//                        "alert":[
+//                            "type": "string"
+//                        ]
+//                    ]
+//                ],
+            ]
+        }
     }
 }
