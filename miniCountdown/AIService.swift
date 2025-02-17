@@ -130,30 +130,6 @@ class AIService {
     }
     
     func getRequestParam(modelName:String, base64Image: String) -> [String: Any] {
-        if modelName.contains("gemini") {
-            //TODO: gemini的模型，看如何支持系统prompt
-            return [
-                "model": modelName,
-                "messages": [
-                    [
-                        "role": "user",
-                        "content": [
-                            [
-                                "type": "text",
-                                "text": self.systemPrompt + "\n" + self.inputPrompt
-                            ],
-                            [
-                                "type": "image_url",
-                                "image_url": [
-                                    "url": "data:image/jpeg;base64,\(base64Image)",
-                                    "detail": "low"
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-            ]
-        }
         return  [
             "model": modelName,
             "messages": [
@@ -174,7 +150,7 @@ class AIService {
                     ]
                 ],
                 [
-                    "role": "developer",
+                    "role": "system",
                     "content": self.systemPrompt
                 ]
             ],
