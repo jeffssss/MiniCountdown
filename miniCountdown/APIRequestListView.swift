@@ -36,6 +36,13 @@ struct APIRequestItemView: View {
                 
                 Spacer()
                 
+                if let (score, threshold) = viewModel.parseScoreAndThreshold(record.output),
+                    let score = score, let threshold = threshold {
+                    Label("评分: \(score) / \(threshold)", systemImage: "number.circle")
+                        .font(.subheadline)
+                        .foregroundStyle(score >= threshold ? Color.secondary : .red)
+                }
+                
                 Label("Token: " + viewModel.formatTokens(record.totalTokens), systemImage: "number")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
