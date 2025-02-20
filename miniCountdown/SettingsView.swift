@@ -2,13 +2,14 @@ import SwiftUI
 
 struct SettingsView: View {
     @State private var savePath: String = ScreenshotManager.shared.savePath
-    @State private var apiKey: String = UserDefaults.standard.string(forKey: "aiServiceApiKey") ?? ""
+    @State private var apiKey: String = AIService.shared.apiKey
     @State private var screenshotInterval: String = String(Int(ScreenshotManager.shared.interval))
     @State private var modelName: String = AIService.shared.modelName
     @State private var inputPrompt: String = AIService.shared.inputPrompt
     @State private var systemPrompt: String = AIService.shared.systemPrompt
     @State private var apiChannel: APIChannel = AIService.shared.aiChannel
     @State private var apiEndpoint: String = AIService.shared.apiEndpoint
+    @State private var temperature: Double = AIService.shared.temperature
 
     @State private var showIntervalError = false
     @State private var showFolderPicker = false
@@ -62,6 +63,8 @@ struct SettingsView: View {
                 }
                 .onChange(of: apiChannel) { oldValue, newValue in
                     AIService.shared.aiChannel = newValue
+                    apiKey = AIService.shared.apiKey
+                    modelName = AIService.shared.modelName
                 }
                 .padding(.vertical, 4)
                 
@@ -96,6 +99,16 @@ struct SettingsView: View {
             }
 
             Section(header: Text("提示词设置").bold()) {
+                HStack {
+                    Slider(value: $temperature, in: 0...2, step: 0.05) {
+                        Text("Temperature")
+                    }.onChange(of: temperature) { oldValue, newValue in
+                        AIService.shared.temperature = newValue
+                    }
+                    Text(temperature, format: .number.precision(.fractionLength(2)))
+                }
+                .padding(.vertical, 4)
+                
                 HStack(alignment: .top) {
                     TextEditor(text: $systemPrompt)
                         .frame(height: 60)

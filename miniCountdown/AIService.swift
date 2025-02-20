@@ -7,7 +7,7 @@ class AIService {
     static let shared = AIService()
     private let userDefaults = UserDefaults.standard
     private let defaultModelName = "gpt-4o-mini"
-    private let modelNameKey = "aiServiceModelName"
+    private let temperatureKey = "apiTemperatureKey"
     
     private var baseURL: String {
         switch aiChannel {
@@ -22,7 +22,10 @@ class AIService {
         }
     }
     
-    private let apiKeyKey = "aiServiceApiKey"
+    private let apiKeyPrefix = "aiServiceApiKey_"
+    private var apiKeyKey: String {
+        return apiKeyPrefix + String(describing: aiChannel)
+    }
     
     private let defaultInputPrompt = "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
     private let inputPromptKey = "aiServiceInputPrompt"
@@ -30,6 +33,11 @@ class AIService {
 
     private let apiChanelKey = "aiServiceChannel"
     private let apiEndpointKey = "aiServiceEndpoint"
+    
+    private let modelNamePrefix = "aiServiceModelName_"
+    private var modelNameKey: String {
+        return modelNamePrefix + String(describing: aiChannel)
+    }
     
     var modelName: String {
         get { userDefaults.string(forKey: modelNameKey) ?? defaultModelName }
@@ -56,10 +64,19 @@ class AIService {
         set { userDefaults.set(newValue, forKey: apiEndpointKey) }
     }
 
-    var apiKey : String{
+    var apiKey: String {
         get { userDefaults.string(forKey: apiKeyKey) ?? "" }
         set { userDefaults.set(newValue, forKey: apiKeyKey) }
     }
+    
+    var temperature: Double {
+        get { userDefaults.double(forKey: temperatureKey) }
+        set { userDefaults.set(newValue, forKey: temperatureKey) }
+    }
+    
+//    func getApiKey(for channel: APIChannel) -> String {
+//        return userDefaults.string(forKey: apiKeyPrefix + String(describing: channel)) ?? ""
+//    }
     
     func hasApiKey() -> Bool {
         return apiKey != ""
@@ -81,7 +98,7 @@ class AIService {
         }
         
         let base64Image = jpegData.base64EncodedString()
-        let modelName = UserDefaults.standard.string(forKey: modelNameKey) ?? defaultModelName
+        let modelName = self.modelName
         let requestStartTime = Date()
         var apiRecord: APIRequestRecord? = nil
         
@@ -163,6 +180,7 @@ class AIService {
             return  [
                 "model": modelName,
                 "stream": false,
+                "temperature": temperature,
                 "messages": [
                     [
                         "role": "user",
