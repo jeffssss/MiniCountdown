@@ -16,26 +16,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         AppDelegate.shared = self
         NSApp.setActivationPolicy(.regular)
         NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate(_:)), name: NSApplication.willTerminateNotification, object: nil)
-        
-        // 在应用启动时创建主窗口
-        let contentView = ContentView()
-        window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 400, height: 300),
-            styleMask: [.titled, .closable, .miniaturizable],
-            backing: .buffered,
-            defer: false
-        )
-        window.contentView = NSHostingView(rootView: contentView)
-        window.delegate = self  // 只在这里设置一次 delegate
-        window.center()
-        window.makeKeyAndOrderFront(nil)
-    }
-    
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag {
-            window.makeKeyAndOrderFront(nil) // 重新显示窗口
-        }
-        return false
     }
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -48,12 +28,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-extension AppDelegate: NSWindowDelegate {
-    func windowShouldClose(_ sender: NSWindow) -> Bool {
-        sender.orderOut(nil) // 只隐藏窗口，不退出应用
-        return false
-    }
-}
+//extension AppDelegate: NSWindowDelegate {
+//    func windowShouldClose(_ sender: NSWindow) -> Bool {
+//        sender.orderOut(nil) // 只隐藏窗口，不退出应用
+//        return false
+//    }
+//}
 
 @main
 struct miniCountdownApp: App {
@@ -62,8 +42,9 @@ struct miniCountdownApp: App {
     
     var body: some Scene {
         WindowGroup {
+            ContentView()
         }
-        .defaultSize(width: 500, height: 600)
+        .defaultSize(width: 400, height: 300)
         .commands {
             CommandMenu("功能") {
                 Button("记录明细") {
