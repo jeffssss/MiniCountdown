@@ -27,10 +27,11 @@ class AIService {
         return apiKeyPrefix + String(describing: aiChannel)
     }
     
-    private let defaultInputPrompt = "这是我电脑的截屏。请用100字以内描述我现在在做什么？"
+    
+    
     private let inputPromptKey = "aiServiceInputPrompt"
     private let systemPromptKey = "aiServiceSystemPrompt"
-
+    
     private let apiChanelKey = "aiServiceChannel"
     private let apiEndpointKey = "aiServiceEndpoint"
     
@@ -50,20 +51,20 @@ class AIService {
     }
     
     var systemPrompt: String {
-        get { userDefaults.string(forKey: systemPromptKey) ?? "" }
+        get { userDefaults.string(forKey: systemPromptKey) ?? defaultSystemPrompt }
         set { userDefaults.set(newValue, forKey: systemPromptKey) }
     }
-
+    
     var aiChannel: APIChannel {
         get { APIChannel(rawValue: userDefaults.integer(forKey: apiChanelKey)) ?? .ollama}
         set { userDefaults.set(newValue.rawValue, forKey: apiChanelKey) }
     }
-
+    
     var apiEndpoint: String {
         get { userDefaults.string(forKey: apiEndpointKey) ?? "http://localhost:11434" }
         set { userDefaults.set(newValue, forKey: apiEndpointKey) }
     }
-
+    
     var apiKey: String {
         get { userDefaults.string(forKey: apiKeyKey) ?? "" }
         set { userDefaults.set(newValue, forKey: apiKeyKey) }
@@ -74,9 +75,9 @@ class AIService {
         set { userDefaults.set(newValue, forKey: temperatureKey) }
     }
     
-//    func getApiKey(for channel: APIChannel) -> String {
-//        return userDefaults.string(forKey: apiKeyPrefix + String(describing: channel)) ?? ""
-//    }
+    //    func getApiKey(for channel: APIChannel) -> String {
+    //        return userDefaults.string(forKey: apiKeyPrefix + String(describing: channel)) ?? ""
+    //    }
     
     func hasApiKey() -> Bool {
         return apiKey != ""
@@ -111,7 +112,7 @@ class AIService {
         )
         
         let parameters = getRequestParam(modelName: modelName, base64Image: base64Image)
-//        print("参数:\(parameters)")
+        //        print("参数:\(parameters)")
         AF.request(baseURL,
                    method: .post,
                    parameters: parameters,
@@ -220,30 +221,70 @@ class AIService {
                 ],
                 "stream": false,
                 "format": "json",
-//                "format": [
-//                    "type": "object",
-//                    "properties": [
-//                        "score":[
-//                            "type": "integer"
-//                        ],
-//                        "isWorking":[
-//                            "type": "boolean"
-//                        ],
-//                        "threshold":[
-//                            "type": "integer"
-//                        ],
-//                        "desc":[
-//                            "type": "string"
-//                        ],
-//                        "reason":[
-//                            "type": "string"
-//                        ],
-//                        "alert":[
-//                            "type": "string"
-//                        ]
-//                    ]
-//                ],
+                //                "format": [
+                //                    "type": "object",
+                //                    "properties": [
+                //                        "score":[
+                //                            "type": "integer"
+                //                        ],
+                //                        "isWorking":[
+                //                            "type": "boolean"
+                //                        ],
+                //                        "threshold":[
+                //                            "type": "integer"
+                //                        ],
+                //                        "desc":[
+                //                            "type": "string"
+                //                        ],
+                //                        "reason":[
+                //                            "type": "string"
+                //                        ],
+                //                        "alert":[
+                //                            "type": "string"
+                //                        ]
+                //                    ]
+                //                ],
             ]
         }
     }
+    
+    private let defaultInputPrompt = """
+判定阈值为60.
+介绍：我是一名开发者，常用的软件包括VSCode、Xcode等代码编辑器
+补充规则：
+```
+我正在工作的场景：
+1. 在搜索引擎里搜索资料，或查阅相关领域的信息。
+2. 在飞书、钉钉、Discord中与他人进行文字沟通
+我不在工作的场景：
+1. 正在浏览微博、抖音、爱奇艺、芒果TV等娱乐性网站
+```
+请使用中文进行回答。
+"""
+    
+    private let defaultSystemPrompt = """
+注意：仅json字符串的形式返回结果，不要包含md格式的代码框或者其他描述性语句。
+你现在是监督我工作的管理员，需要根据我提供的信息以及屏幕截图，判断我是否在认真工作。
+1. 我会输入判定阈值、我的背景介绍(比如我的职业、我工作用的一些软件、补充的判定条件)、以及我当前电脑的截屏。
+2. 你需要对我进行打分：100代表我一定在认真工作，0代表我一定没有认真工作。
+3. 基于我给到你的判定阈值，请你得出我是否在认真工作的结论：得分大于阈值，则认真工作；否则是没有认真工作。
+4. 请你简要描述我目前在做的事；
+5. 若判定我没有认真工作，请说明你判断的原因
+6. 当判定我没有认真工作时，请你扮演管理员的角色，编写一两句督促我工作的话语(100字以内)。
+7. 最终结果以json的形式输出。json字段包括：
+* score：得分
+* isWorking: 是否认真工作
+* threshold: 判定阈值
+* desc: 截图内容的描述
+* reason：当判定没有认真工作时，判定的理由
+* alert: 当判定没有认真工作时，提醒的话语
+—
+关于判断逻辑的补充：
+* 优先判断屏幕中正在聚焦的窗口的内容，判断是否是在工作。
+* 如果截图里是网页内容，请你识别网页里的较大部分的文字，再进行判断。如果网页中在播放视频，请你基于视频的图像，判断我是在娱乐还是在学习。
+* 补充规则仅仅是一些高优先级的判定规则。如果我正在做的事情不在补充规则里，则需要你根据你的理解，自行判断。
+* 只要判断我是否在工作状态即可，无需判断我的注意力是否在有效的工作上。
+* 忽略截图底部的dock中的图标以及顶部的菜单栏的内容。
+再次强调，使用JSON回答，不要包含除JSON外的其他内容。
+"""
 }
