@@ -175,6 +175,24 @@ class WorkMindManager {
         }
     }
     
+    // 获取指定计划的已完成总时间（秒）
+    func getCompletedTotalSeconds(planId: String) -> Int32 {
+        let request: NSFetchRequest<WorkMindRecord> = WorkMindRecord.fetchRequest()
+        request.predicate = NSPredicate(
+            format: "planId == %@ AND status == %d",
+            planId,
+            CountdownStatus.completed.rawValue
+        )
+        
+        do {
+            let records = try context.fetch(request)
+            return records.reduce(0) { $0 + $1.duration }
+        } catch {
+            print("获取计划完成时间失败: \(error.localizedDescription)")
+            return 0
+        }
+    }
+    
     // 删除记录
     func deleteRecord(_ record: WorkMindRecord) {
         context.delete(record)

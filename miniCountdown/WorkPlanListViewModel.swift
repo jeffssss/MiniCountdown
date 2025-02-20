@@ -48,4 +48,9 @@ class WorkPlanListViewModel: ObservableObject {
     func getActiveStatusColor(_ isActive: Int16) -> Color {
         return isActive >= 0 ? .green : .red
     }
+    
+    func getCompletedHours(_ plan: WorkPlanRecord) -> Float {
+        let totalMinutes = WorkMindManager.shared.getCompletedTotalSeconds(planId: plan.id)
+        return Float(totalMinutes) / 3600.0
+    }
 }
