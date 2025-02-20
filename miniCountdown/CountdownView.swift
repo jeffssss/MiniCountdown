@@ -8,6 +8,8 @@ struct CountdownView: View {
     let isAlwaysOnTop: Bool
     let isDarkMode: Bool
     
+    @State private var isAIMonitorEnabled : Bool
+    
     @State private var remainingSeconds: Int
     @State private var timer: Timer?
     @State private var isMouseInside: Bool = false
@@ -19,13 +21,17 @@ struct CountdownView: View {
     @State private var pauseStartTime: Date?
     
     @State private var compensateTime: Int
+    @State private var lastScreenshotTimeSinceStart : TimeInterval
+    @State private var startTime : Date?
     
-    init(totalSeconds: Int, isAlwaysOnTop: Bool, isDarkMode: Bool) {
+    init(totalSeconds: Int, isAlwaysOnTop: Bool, isDarkMode: Bool, isAIMonitorEnabled: Bool = true) {
         self.totalSeconds = totalSeconds
         self.isAlwaysOnTop = isAlwaysOnTop
         self.isDarkMode = isDarkMode
+        self.isAIMonitorEnabled = isAIMonitorEnabled
         _remainingSeconds = State(initialValue: totalSeconds)
         self.compensateTime = 0
+        self.lastScreenshotTimeSinceStart = 0
     }
     
     var body: some View {
@@ -46,6 +52,20 @@ struct CountdownView: View {
                         VStack {
                             Spacer()
                             HStack {
+                                Button(action: {
+                                    isAIMonitorEnabled.toggle()
+                                    if isAIMonitorEnabled, let startTime = startTime {
+                                        // 更新lastScreenshotTimeSinceStart为当前时间减去补偿时间
+                                        lastScreenshotTimeSinceStart = Date().timeIntervalSince(startTime) - Double(compensateTime)
+                                    }
+                                }) {
+                                    Image(systemName: isAIMonitorEnabled ? "eye.circle.fill" : "eye.slash.circle.fill")
+                                        .font(.system(size: 18))
+                                        .foregroundColor(isAIMonitorEnabled ? (isDarkMode ? .white : .black) : .gray)
+                                        .padding(8)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
                                 Spacer()
                                 Button(action: {
                                     if isPaused {
@@ -62,7 +82,7 @@ struct CountdownView: View {
                                     }
                                 }) {
                                     Image(systemName: isPaused ? "play.circle.fill" : "pause.circle.fill")
-                                        .font(.system(size: 16))
+                                        .font(.system(size: 18))
                                         .foregroundColor(isDarkMode ? .white : .black)
                                 }
                                 .buttonStyle(PlainButtonStyle())
@@ -79,7 +99,7 @@ struct CountdownView: View {
                     closeCountdownWindow(status: .interrupted)
                 }) {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 16))
+                        .font(.system(size: 18))
                         .foregroundColor(isDarkMode ? .white : .black)
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -117,8 +137,9 @@ struct CountdownView: View {
     
     private func startTimer() {
         let screenshotManager = ScreenshotManager.shared
-        var lastScreenshotTimeSinceStart : TimeInterval = 0
-        let startTime = Date()  // 记录开始时间
+        lastScreenshotTimeSinceStart = 0
+        compensateTime = 0
+        startTime = Date()  // 记录开始时间
         
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
             if isPaused {
@@ -126,16 +147,16 @@ struct CountdownView: View {
             }
             let currentTime = Date()
             //更新倒计时
-            let elapsedSeconds = Int(currentTime.timeIntervalSince(startTime))
+            let elapsedSeconds = Int(currentTime.timeIntervalSince(startTime!))
             remainingSeconds = max(totalSeconds + compensateTime - elapsedSeconds, 0)
             
             if remainingSeconds > 0 {
                 // 检查是否需要执行截图
-                let timeSinceStart = currentTime.timeIntervalSince(startTime) - Double(compensateTime)
+                let timeSinceStart = currentTime.timeIntervalSince(startTime!) - Double(compensateTime)
                 if timeSinceStart - lastScreenshotTimeSinceStart >= screenshotManager.interval {
                     lastScreenshotTimeSinceStart = timeSinceStart
                     
-                    if AIService.shared.hasApiKey() {
+                    if isAIMonitorEnabled && AIService.shared.hasApiKey() {
                         print("处理截图和识别逻辑")
                         let screenshot = screenshotManager.takeScreenshot()
                         if let image = screenshot.image, let screenshotPath = screenshot.path {

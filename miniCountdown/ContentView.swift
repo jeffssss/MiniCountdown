@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var seconds: String = "0"
     @State private var isAlwaysOnTop: Bool = true
     @State private var isDarkMode: Bool = false
+    @State private var isAIMonitorEnabled: Bool = true
     @State private var currentPlan: WorkPlanRecord? = nil
     @State private var todayCompletedMinutes: Int = 0
     @State private var showWorkPlanList: Bool = true
@@ -68,6 +69,9 @@ struct ContentView: View {
             Toggle("深色模式", isOn: $isDarkMode)
                 .padding(.horizontal)
             
+            Toggle("AI监控", isOn: $isAIMonitorEnabled)
+                .padding(.horizontal)
+            
             Button(action: {
                 if totalSeconds > 0 {
                     hideMainWindow()
@@ -110,7 +114,6 @@ struct ContentView: View {
     }
 
     private func updatePlanInfo(_ modifyCountdown:Bool = true) {
-        print("更新计划信息")
         let manager = WorkMindManager.shared
         currentPlan = manager.getCurrentActivePlan()
         
@@ -147,7 +150,8 @@ struct ContentView: View {
         let countdownView = CountdownView(
             totalSeconds: totalSeconds,
             isAlwaysOnTop: isAlwaysOnTop,
-            isDarkMode: isDarkMode
+            isDarkMode: isDarkMode,
+            isAIMonitorEnabled: isAIMonitorEnabled
         )
         
         let window = NSWindow(
