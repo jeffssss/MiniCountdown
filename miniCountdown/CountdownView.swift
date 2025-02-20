@@ -15,12 +15,17 @@ struct CountdownView: View {
     @State private var audioPlayer: AVAudioPlayer?
     @State private var hostWindow: NSWindow?
     @State private var currentRecord: WorkMindRecord?
+    @State private var isPaused: Bool = false
+    @State private var pauseStartTime: Date?
+    
+    @State private var compensateTime: Int
     
     init(totalSeconds: Int, isAlwaysOnTop: Bool, isDarkMode: Bool) {
         self.totalSeconds = totalSeconds
         self.isAlwaysOnTop = isAlwaysOnTop
         self.isDarkMode = isDarkMode
         _remainingSeconds = State(initialValue: totalSeconds)
+        self.compensateTime = 0
     }
     
     var body: some View {
@@ -36,6 +41,35 @@ struct CountdownView: View {
                         .lineLimit(1)
                         .padding(.horizontal, 10)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    
+                    if isMouseInside {
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Spacer()
+                                Button(action: {
+                                    if isPaused {
+                                        // 继续计时
+                                        if let pauseTime = pauseStartTime {
+                                            compensateTime += Int(Date().timeIntervalSince(pauseTime))
+                                        }
+                                        isPaused = false
+                                        pauseStartTime = nil
+                                    } else {
+                                        // 暂停计时
+                                        isPaused = true
+                                        pauseStartTime = Date()
+                                    }
+                                }) {
+                                    Image(systemName: isPaused ? "play.circle.fill" : "pause.circle.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(isDarkMode ? .white : .black)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                .padding(8)
+                            }
+                        }
+                    }
                 }
             }
             
@@ -85,9 +119,11 @@ struct CountdownView: View {
         let screenshotManager = ScreenshotManager.shared
         var lastScreenshotTimeSinceStart : TimeInterval = 0
         let startTime = Date()  // 记录开始时间
-        var compensateTime = 0 // 补偿的时间
         
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+            if isPaused {
+                return
+            }
             let currentTime = Date()
             //更新倒计时
             let elapsedSeconds = Int(currentTime.timeIntervalSince(startTime))
@@ -128,8 +164,13 @@ struct CountdownView: View {
                                                 if response == .alertFirstButtonReturn {
                                                     let confirmTime = Date()
                                                     let confirmDelay = Int(confirmTime.timeIntervalSince(alertTime))
-                                                    compensateTime += confirmDelay
-                                                    print("用户确认了警告信息,耗时为\(confirmDelay),会补充至compensateTime=\(compensateTime)")
+                                                    if !isPaused {
+                                                        compensateTime += confirmDelay
+                                                        print("用户确认了警告信息,耗时为\(confirmDelay),会补充至compensateTime=\(compensateTime)")
+                                                    } else {
+                                                        print("用户确认了警告信息,耗时为\(confirmDelay),由于当前处于暂停状态，不补充时间")
+                                                    }
+                                                    
                                                 }
                                             }
                                         }
