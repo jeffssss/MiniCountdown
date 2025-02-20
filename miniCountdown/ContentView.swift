@@ -27,18 +27,29 @@ struct ContentView: View {
         return plan.targetHours / Float(plan.workDays)
     }
     
+    private var planCompletionPercentage: Float {
+        guard let plan = currentPlan else { return 0 }
+        let completed = WorkMindManager.shared.getCompletedTotalSeconds(planId: plan.id)
+        return Float(completed) / 3600.0 / plan.targetHours * 100
+    }
+    
     var body: some View {
         VStack(spacing: 15) {
             Text("倒计时设置")
                 .font(.title)
                 .padding(.vertical, 10)
             
-            if let plan = currentPlan {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("今日目标: \(String(format: "%.2g", dailyTargetHours))小时")
-                        .font(.headline)
-                    Text("已完成: \(String(format: "%.2g", Float(todayCompletedMinutes) / 60.0))小时")
-                        .font(.headline)
+            if currentPlan != nil {
+                VStack(alignment: .center, spacing: 8) {
+                    HStack{
+                        Text("今日目标: \(String(format: "%.2g", dailyTargetHours))小时")
+                            .font(.headline)
+                        Text("已完成: \(String(format: "%.2g", Float(todayCompletedMinutes) / 60.0))小时")
+                            .font(.headline)
+                    }
+                    
+                    Text("工作计划完成 \(String(format: "%.2g", planCompletionPercentage))%")
+                        .font(.subheadline)
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 5)

@@ -50,7 +50,7 @@ class WorkPlanListViewModel: ObservableObject {
     }
     
     func getCompletedHours(_ plan: WorkPlanRecord) -> Float {
-        let totalMinutes = WorkMindManager.shared.getCompletedTotalSeconds(planId: plan.id)
-        return Float(totalMinutes) / 3600.0
+        let total = WorkMindManager.shared.getCompletedTotalSeconds(planId: plan.id)
+        return Float(total) / 3600.0
     }
 }
