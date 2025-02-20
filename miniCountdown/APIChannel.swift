@@ -1,9 +1,10 @@
 import Foundation
 
-enum APIChannel: Int {
+enum APIChannel: Int, CaseIterable {
     case ollama = 0
     case aiHubMix = 1
     case openAI = 2
+    case grok = 3
     
     var displayName: String {
         switch self {
@@ -13,6 +14,8 @@ enum APIChannel: Int {
             return "AiHubMix"
         case .openAI:
             return "OpenAI"
+        case .grok:
+            return "Grok"
         }
     }
     
@@ -24,6 +27,8 @@ enum APIChannel: Int {
             return .aiHubMix
         case "OpenAI":
             return .openAI
+        case "Grok":
+            return .grok
         default:
             return .ollama
         }

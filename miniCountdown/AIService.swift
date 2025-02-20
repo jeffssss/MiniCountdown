@@ -17,6 +17,8 @@ class AIService {
             return "https://aihubmix.com/v1/chat/completions"
         case .openAI:
             return "https://api.openai.com/v1/chat/completions"
+        case .grok:
+            return "https://api.x.ai/v1/chat/completions"
         }
     }
     
@@ -157,9 +159,10 @@ class AIService {
     
     func getRequestParam(modelName:String, base64Image: String) -> [String: Any] {
         switch aiChannel{
-        case .aiHubMix,.openAI:
+        case .aiHubMix, .openAI, .grok:
             return  [
                 "model": modelName,
+                "stream": false,
                 "messages": [
                     [
                         "role": "user",

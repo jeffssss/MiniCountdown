@@ -54,10 +54,11 @@ struct SettingsView: View {
             }
             
             Section(header: Text("AI服务设置").bold()) {
+                let apiChannels = APIChannel.allCases // 提取到变量中
                 Picker("API通道", selection: $apiChannel) {
-                    Text(APIChannel.ollama.displayName).tag(APIChannel.ollama)
-                    Text(APIChannel.aiHubMix.displayName).tag(APIChannel.aiHubMix)
-                    Text(APIChannel.openAI.displayName).tag(APIChannel.openAI)
+                    ForEach(apiChannels, id: \.self) { channel in
+                        Text(channel.displayName).tag(channel)
+                    }
                 }
                 .onChange(of: apiChannel) { oldValue, newValue in
                     AIService.shared.aiChannel = newValue
@@ -73,7 +74,7 @@ struct SettingsView: View {
                 }
                 .padding(.vertical, 4)
                 
-                if apiChannel == .aiHubMix || apiChannel == .openAI {
+                if apiChannel != .ollama {
                     HStack {
                         TextField("API密钥", text: $apiKey)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
