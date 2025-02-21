@@ -10,7 +10,6 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     static var shared: AppDelegate?
     var isCountdownRunning = false
-    var window: NSWindow!
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
@@ -41,7 +40,7 @@ struct miniCountdownApp: App {
     @Environment(\.openWindow) private var openWindow
     
     var body: some Scene {
-        WindowGroup {
+        Window("上如班", id: "mainWindow") {
             ContentView()
         }
         .defaultSize(width: 400, height: 300)

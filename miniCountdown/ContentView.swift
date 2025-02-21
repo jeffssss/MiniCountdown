@@ -137,11 +137,11 @@ struct ContentView: View {
     }
     
     private func hideMainWindow() {
-        if let appDelegate = AppDelegate.shared {
-            appDelegate.window.orderOut(nil)  // 使用AppDelegate中的window引用
+        if let window = NSApplication.shared.windows.first(where: { $0.identifier?.rawValue == "mainWindow" }) {
+            window.orderOut(nil)
             // 确保在窗口关闭后再设置状态
             DispatchQueue.main.async {
-                appDelegate.isCountdownRunning = true
+                AppDelegate.shared?.isCountdownRunning = true
             }
         }
     }
