@@ -15,6 +15,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         AppDelegate.shared = self
         NSApp.setActivationPolicy(.regular)
         NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate(_:)), name: NSApplication.willTerminateNotification, object: nil)
+        
+        // 添加锁屏状态监听
+//        NSWorkspace.shared.notificationCenter.addObserver(
+//            self,
+//            selector: #selector(screenDidLock(_:)),
+//            name: NSWorkspace.sessionDidResignActiveNotification,
+//            object: nil
+//        )
+        
+        DistributedNotificationCenter.default().addObserver(self,
+                                                            selector: #selector(screenDidLock(_:)),
+                                                            name: NSNotification.Name(rawValue: "com.apple.screenIsLocked"),
+                                                            object: nil)
+    }
+    
+    @objc func screenDidLock(_ notification: Notification) {
+        print("screenDidLock invoke")
+        if isCountdownRunning {
+            NotificationCenter.default.post(name: NSNotification.Name("ScreenDidLock"), object: nil)
+        }
     }
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

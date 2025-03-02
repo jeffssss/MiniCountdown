@@ -111,6 +111,7 @@ struct CountdownView: View {
             isMouseInside = hovering
         }
         .onAppear {
+            print("CountdownView onAppear")
             // 创建倒计时记录
             currentRecord = WorkMindManager.shared.createRecord(duration: Int32(totalSeconds))
             startTimer()
@@ -119,6 +120,38 @@ struct CountdownView: View {
                 return window.contentView is NSHostingView<CountdownView>
             }) {
                 hostWindow = window
+            }
+            
+            // 添加锁屏事件监听
+            NotificationCenter.default.addObserver(
+                forName: NSNotification.Name("ScreenDidLock"),
+                object: nil,
+                queue: .main
+            ) { _ in
+                if !isPaused {
+                    let alert = NSAlert()
+                    alert.messageText = "检测到锁屏"
+                    alert.informativeText = "已检测到锁屏操作，点击确认继续工作"
+                    alert.alertStyle = .warning
+                    alert.addButton(withTitle: "确定")
+                    alert.window.level = .floating
+                    
+                    NSApp.activate(ignoringOtherApps: true)
+                    
+                    // 处理按钮点击回调
+                    let alertTime = Date()
+                    let response = alert.runModal()
+                    if response == .alertFirstButtonReturn {
+                        let confirmTime = Date()
+                        let confirmDelay = Int(confirmTime.timeIntervalSince(alertTime))
+                        if !isPaused {
+                            compensateTime += confirmDelay
+                            print("用户确认了警告信息,耗时为\(confirmDelay),会补充至compensateTime=\(compensateTime)")
+                        } else {
+                            print("用户确认了警告信息,耗时为\(confirmDelay),由于当前处于暂停状态，不补充时间")
+                        }
+                    }
+                }
             }
         }
         .onDisappear {
