@@ -17,7 +17,7 @@ struct RecordItemView: View {
             
             Spacer()
 
-            Text("持续 " + viewModel.calculateDuration(record: record))
+            Text("工作了 " + viewModel.calculateDuration(record: record))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             

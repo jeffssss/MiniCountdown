@@ -54,16 +54,36 @@ class RecordListViewModel: ObservableObject {
         case CountdownStatus.running.rawValue:
             return "--"
         case CountdownStatus.completed.rawValue:
-            return "\(record.duration)秒"
+            return formatDurationSeconds(Int(record.duration))
         case CountdownStatus.interrupted.rawValue:
             if let endTime = record.endTime {
                 let duration = Int(endTime.timeIntervalSince(record.startTime))
-                return "\(duration)秒"
+                return formatDurationSeconds(duration)
             }
             return "--"
         default:
             return "--"
         }
+    }
+    
+    private func formatDurationSeconds(_ totalSeconds: Int) -> String {
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        let seconds = totalSeconds % 60
+        
+        var parts: [String] = []
+        
+        if hours > 0 {
+            parts.append("\(hours)小时")
+        }
+        if minutes > 0 {
+            parts.append("\(minutes)分")
+        }
+        if seconds > 0 || parts.isEmpty {
+            parts.append("\(seconds)秒")
+        }
+        
+        return parts.joined()
     }
     
     func getStatusName(status: Int16) -> String {
