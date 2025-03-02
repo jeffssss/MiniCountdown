@@ -14,20 +14,26 @@ class WorkPlanListViewModel: ObservableObject {
     
     func loadPlans() {
         let newPlans = WorkMindManager.shared.getWorkPlans(page: 0, pageSize: pageSize)
+        newPlans.forEach { plan in
+            plan.completedHours = getCompletedHours(plan)
+        }
         plans = newPlans
         currentPage = 0
-    }
-    
-    func refresh() {
-        loadPlans()
     }
     
     func loadNextPage() {
         currentPage += 1
         let newPlans = WorkMindManager.shared.getWorkPlans(page: currentPage, pageSize: pageSize)
         if !newPlans.isEmpty {
+            newPlans.forEach { plan in
+                plan.completedHours = getCompletedHours(plan)
+            }
             plans.append(contentsOf: newPlans)
         }
+    }
+    
+    func refresh() {
+        loadPlans()
     }
     
     func formatDate(_ date: Date?) -> String {

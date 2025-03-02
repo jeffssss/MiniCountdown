@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "32C38BE52D095608004BA794"
-               BuildableName = "miniCountdown.app"
-               BlueprintName = "miniCountdown"
-               ReferencedContainer = "container:miniCountdown.xcodeproj">
+               BuildableName = "WorkMind.app"
+               BlueprintName = "WorkMind"
+               ReferencedContainer = "container:WorkMind.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -45,9 +45,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32C38BE52D095608004BA794"
-            BuildableName = "miniCountdown.app"
-            BlueprintName = "miniCountdown"
-            ReferencedContainer = "container:miniCountdown.xcodeproj">
+            BuildableName = "WorkMind.app"
+            BlueprintName = "WorkMind"
+            ReferencedContainer = "container:WorkMind.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "32C38BE52D095608004BA794"
-            BuildableName = "miniCountdown.app"
-            BlueprintName = "miniCountdown"
-            ReferencedContainer = "container:miniCountdown.xcodeproj">
+            BuildableName = "WorkMind.app"
+            BlueprintName = "WorkMind"
+            ReferencedContainer = "container:WorkMind.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

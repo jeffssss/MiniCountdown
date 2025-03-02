@@ -31,7 +31,7 @@ struct WorkPlanItemView: View {
                     .foregroundColor(.secondary)
                 
                 Spacer()
-                let completeHour = viewModel.getCompletedHours(plan)
+                let completeHour = plan.completedHours ?? 0
                 Label("已完成 \(String(format: "%.2g", completeHour))小时(\(String(format: "%.2g",completeHour/plan.targetHours * 100))%)",
                       systemImage: "checkmark.circle")
                     .font(.subheadline)

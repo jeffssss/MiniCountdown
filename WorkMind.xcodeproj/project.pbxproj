@@ -14,18 +14,18 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		32C38BE62D095608004BA794 /* miniCountdown.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = miniCountdown.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		32C38BE62D095608004BA794 /* WorkMind.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WorkMind.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		32C38BFC2D096E10004BA794 /* finish_sound.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = finish_sound.wav; sourceTree = "<group>"; };
 		32EDE21E2D6243F8005851D7 /* not_working_alert.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = not_working_alert.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		3276C20A2D0988DE00C3707C /* Exceptions for "miniCountdown" folder in "miniCountdown" target */ = {
+		3276C20A2D0988DE00C3707C /* Exceptions for "miniCountdown" folder in "WorkMind" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 32C38BE52D095608004BA794 /* miniCountdown */;
+			target = 32C38BE52D095608004BA794 /* WorkMind */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -33,7 +33,7 @@
 		32C38BE82D095608004BA794 /* miniCountdown */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3276C20A2D0988DE00C3707C /* Exceptions for "miniCountdown" folder in "miniCountdown" target */,
+				3276C20A2D0988DE00C3707C /* Exceptions for "miniCountdown" folder in "WorkMind" target */,
 			);
 			path = miniCountdown;
 			sourceTree = "<group>";
@@ -66,7 +66,7 @@
 		32C38BE72D095608004BA794 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32C38BE62D095608004BA794 /* miniCountdown.app */,
+				32C38BE62D095608004BA794 /* WorkMind.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,9 +74,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		32C38BE52D095608004BA794 /* miniCountdown */ = {
+		32C38BE52D095608004BA794 /* WorkMind */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32C38BF52D095609004BA794 /* Build configuration list for PBXNativeTarget "miniCountdown" */;
+			buildConfigurationList = 32C38BF52D095609004BA794 /* Build configuration list for PBXNativeTarget "WorkMind" */;
 			buildPhases = (
 				32C38BE22D095608004BA794 /* Sources */,
 				32C38BE32D095608004BA794 /* Frameworks */,
@@ -89,13 +89,13 @@
 			fileSystemSynchronizedGroups = (
 				32C38BE82D095608004BA794 /* miniCountdown */,
 			);
-			name = miniCountdown;
+			name = WorkMind;
 			packageProductDependencies = (
 				323CE2C02D5BD24200AFF6D2 /* Alamofire */,
 				323CE2C32D5BD25200AFF6D2 /* SwiftyJSON */,
 			);
 			productName = miniCountdown;
-			productReference = 32C38BE62D095608004BA794 /* miniCountdown.app */;
+			productReference = 32C38BE62D095608004BA794 /* WorkMind.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -113,7 +113,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 32C38BE12D095608004BA794 /* Build configuration list for PBXProject "miniCountdown" */;
+			buildConfigurationList = 32C38BE12D095608004BA794 /* Build configuration list for PBXProject "WorkMind" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -132,7 +132,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				32C38BE52D095608004BA794 /* miniCountdown */,
+				32C38BE52D095608004BA794 /* WorkMind */,
 			);
 		};
 /* End PBXProject section */
@@ -288,22 +288,22 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"miniCountdown/Preview Content\"";
 				DEVELOPMENT_TEAM = 557WM87629;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = miniCountdown/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = miniCountdown;
+				INFOPLIST_KEY_CFBundleDisplayName = WorkMind;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.3;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jeffssss.miniCountdown;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -321,22 +321,22 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"miniCountdown/Preview Content\"";
 				DEVELOPMENT_TEAM = 557WM87629;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = miniCountdown/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = miniCountdown;
+				INFOPLIST_KEY_CFBundleDisplayName = WorkMind;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.3;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jeffssss.miniCountdown;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -347,7 +347,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		32C38BE12D095608004BA794 /* Build configuration list for PBXProject "miniCountdown" */ = {
+		32C38BE12D095608004BA794 /* Build configuration list for PBXProject "WorkMind" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32C38BF32D095609004BA794 /* Debug */,
@@ -356,7 +356,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32C38BF52D095609004BA794 /* Build configuration list for PBXNativeTarget "miniCountdown" */ = {
+		32C38BF52D095609004BA794 /* Build configuration list for PBXNativeTarget "WorkMind" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32C38BF62D095609004BA794 /* Debug */,
