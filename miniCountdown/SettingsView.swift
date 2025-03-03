@@ -1,141 +1,77 @@
 import SwiftUI
 
 struct SettingsView: View {
+    // 截图设置
     @State private var savePath: String = ScreenshotManager.shared.savePath
-    @State private var apiKey: String = AIService.shared.apiKey
     @State private var screenshotInterval: String = String(Int(ScreenshotManager.shared.interval))
+    
+    // AI服务设置
+    @State private var apiKey: String = AIService.shared.apiKey
     @State private var modelName: String = AIService.shared.modelName
     @State private var inputPrompt: String = AIService.shared.inputPrompt
     @State private var systemPrompt: String = AIService.shared.systemPrompt
     @State private var apiChannel: APIChannel = AIService.shared.aiChannel
     @State private var apiEndpoint: String = AIService.shared.apiEndpoint
     @State private var temperature: Double = AIService.shared.temperature
-
+    
+    // 应用监控设置
+    @State private var banList: [String] = AppMonitor.shared.banList
+    @State private var timeout: String = String(AppMonitor.shared.timeout)
+    @State private var showTimeoutError = false
+    @State private var selectedApp: AppInfo? = nil
+    @State private var runningApps: [AppInfo] = []
+    
     @State private var showIntervalError = false
     @State private var showFolderPicker = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
     
+    @State private var selectedTab = 0
+    
     var body: some View {
-        Form {
-            Section(header: Text("截图设置").bold()) {
-                HStack {
-                    TextField("截图间隔（秒）", text: $screenshotInterval)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .frame(width: 180)
-                        .onChange(of: screenshotInterval) { oldValue, newValue in
-                            if let interval = Int(newValue), interval > 0 {
-                                showIntervalError = false
-                                ScreenshotManager.shared.interval = TimeInterval(interval)
-                            } else {
-                                showIntervalError = true
-                            }
-                        }
-                    if showIntervalError {
-                        Text("请输入大于0的数字")
-                            .foregroundColor(.red)
-                            .font(.caption)
-                    }
-                }
-                .padding(.vertical, 4)
-                
-                HStack {
-                    TextField("保存路径", text: $savePath)
-                        .truncationMode(.middle)
-                        .lineLimit(1)
-                        .disabled(true)
-                    
-                    Spacer()
-                    
-                    Button("选择文件夹") {
-                        showFolderPicker = true
-                    }
-                }
-                .padding(.vertical, 4)
+        TabView(selection: $selectedTab) {
+            // 截图设置标签页
+            ScreenshotSettingsView(
+                savePath: $savePath,
+                screenshotInterval: $screenshotInterval,
+                showIntervalError: $showIntervalError,
+                showFolderPicker: $showFolderPicker
+            )
+            .tabItem {
+                Image(systemName: "camera")
+                Text("截图设置")
             }
+            .tag(0)
             
-            Section(header: Text("AI服务设置").bold()) {
-                let apiChannels = APIChannel.allCases // 提取到变量中
-                Picker("API通道", selection: $apiChannel) {
-                    ForEach(apiChannels, id: \.self) { channel in
-                        Text(channel.displayName).tag(channel)
-                    }
-                }
-                .onChange(of: apiChannel) { oldValue, newValue in
-                    AIService.shared.aiChannel = newValue
-                    apiKey = AIService.shared.apiKey
-                    modelName = AIService.shared.modelName
-                }
-                .padding(.vertical, 4)
-                
-                HStack {
-                    TextField("模型名称", text: $modelName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .onChange(of: modelName) { oldValue, newValue in
-                            AIService.shared.modelName = newValue
-                        }
-                }
-                .padding(.vertical, 4)
-                
-                if apiChannel != .ollama {
-                    HStack {
-                        TextField("API密钥", text: $apiKey)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: apiKey) { oldValue, newValue in
-                                AIService.shared.apiKey = newValue
-                            }
-                    }
-                    .padding(.vertical, 4)
-                } else if apiChannel == .ollama {
-                    HStack {
-                        TextField("API域名", text: $apiEndpoint)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: apiEndpoint) { oldValue, newValue in
-                                AIService.shared.apiEndpoint = newValue
-                            }
-                    }
-                    .padding(.vertical, 4)
-                }
+            // AI设置标签页
+            AISettingsView(
+                apiKey: $apiKey,
+                modelName: $modelName,
+                inputPrompt: $inputPrompt,
+                systemPrompt: $systemPrompt,
+                apiChannel: $apiChannel,
+                apiEndpoint: $apiEndpoint,
+                temperature: $temperature
+            )
+            .tabItem {
+                Image(systemName: "brain")
+                Text("AI设置")
             }
-
-            Section(header: Text("提示词设置").bold()) {
-                HStack {
-                    Slider(value: $temperature, in: 0...2, step: 0.05) {
-                        Text("Temperature")
-                    }.onChange(of: temperature) { oldValue, newValue in
-                        AIService.shared.temperature = newValue
-                    }
-                    Text(temperature, format: .number.precision(.fractionLength(2)))
-                }
-                .padding(.vertical, 4)
-                
-                HStack(alignment: .top) {
-                    TextEditor(text: $systemPrompt)
-                        .frame(height: 60)
-                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.2)))
-                        .onChange(of: systemPrompt) { oldValue, newValue in
-                            AIService.shared.systemPrompt = newValue
-                        }.overlay(alignment: .topLeading, content: {
-                            Text("系统Prompt")
-                                .frame(width: 100, alignment: .leading).offset(CGSize(width: -80,height: 0))
-                        })
-                }
-                .padding(.vertical, 4)
-                
-                HStack(alignment: .top) {
-                    TextEditor(text: $inputPrompt)
-                        .frame(height: 60)
-                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.gray.opacity(0.2)))
-                        .onChange(of: inputPrompt) { oldValue, newValue in
-                            AIService.shared.inputPrompt = newValue
-                        }.overlay(alignment: .topLeading, content: {
-                            Text("输入Prompt")
-                                .frame(width: 100, alignment: .leading).offset(CGSize(width: -80,height: 0))
-                        })
-                }
-                .padding(.vertical, 4)
+            .tag(1)
+            
+            // 应用监控标签页
+            AppMonitorSettingsView(
+                banList: $banList,
+                timeout: $timeout,
+                showTimeoutError: $showTimeoutError,
+                selectedApp: $selectedApp,
+                runningApps: $runningApps
+            )
+            .tabItem {
+                Image(systemName: "eye")
+                Text("应用监控")
             }
-
+            .tag(2)
         }
         .padding(20)
         .frame(width: 500, height: 450)
