@@ -59,8 +59,8 @@ struct AppMonitorSettingsView: View {
                 
                 Picker("添加应用", selection: $selectedApp) {
                     Text("选择应用").tag(nil as AppInfo?)
-                    ForEach(runningApps) { app in
-                        Text(app.name).tag(app as AppInfo?)
+                    ForEach(runningApps, id: \.bundleIdentifier) { app in
+                        Text("\(app.name)(\(app.bundleIdentifier))").tag(app as AppInfo?)
                     }
                 }
                 .onChange(of: selectedApp) { oldValue, newValue in

@@ -27,35 +27,39 @@ class AppMonitor {
     
     private init() {}
     
-    func checkWorkStatus() -> Bool {
-        guard let frontmostApp = NSWorkspace.shared.frontmostApplication else { return true }
+    func checkWorkStatus() -> (Bool,String) {
+        guard let frontmostApp = NSWorkspace.shared.frontmostApplication else { return (true, "")}
         let bundleIdentifier = frontmostApp.bundleIdentifier ?? ""
+        let appName = frontmostApp.localizedName ?? "当前应用"
         
         // 如果应用在禁用列表中
         if banList.contains(bundleIdentifier) {
             // 如果是新切换到这个应用
             if lastActiveApp != bundleIdentifier {
+                print("切换至: \(appName)(\(bundleIdentifier)) in ban list")
                 lastActiveApp = bundleIdentifier
                 lastActiveTime = Date()
-                return true
+                return (true, appName)
             }
             
             // 如果已经在使用这个应用
             if let lastTime = lastActiveTime {
                 let duration = Date().timeIntervalSince(lastTime)
                 if duration > Double(timeout) {
-                    return false
+                    lastActiveTime = Date()
+                    return (false, appName)
                 }
             }
         } else {
             // 如果切换到了其他应用，重置计时
             if lastActiveApp != bundleIdentifier {
+                print("切换至: \(appName)(\(bundleIdentifier))")
                 lastActiveApp = bundleIdentifier
                 lastActiveTime = nil
             }
         }
         
-        return true
+        return (true,appName)
     }
     
     func addToBanList(_ bundleIdentifier: String) {
@@ -71,8 +75,26 @@ class AppMonitor {
     }
     
     func getRunningApplications() -> [AppInfo] {
-        return NSWorkspace.shared.runningApplications
-            .filter { $0.bundleIdentifier != nil && $0.localizedName != nil }
+        let apps = NSWorkspace.shared.runningApplications
+            .filter { app in
+                guard let bundleId = app.bundleIdentifier,
+                      let name = app.localizedName,
+                      app.activationPolicy == .regular else {
+                    return false
+                }
+                return true
+            }
+        
+        // 使用Dictionary来去除重复的应用，保留第一个出现的实例
+        var uniqueApps: [String: NSRunningApplication] = [:]
+        for app in apps {
+            if let bundleId = app.bundleIdentifier,
+               uniqueApps[bundleId] == nil {
+                uniqueApps[bundleId] = app
+            }
+        }
+        
+        return uniqueApps.values
             .map { AppInfo(bundleIdentifier: $0.bundleIdentifier!, name: $0.localizedName!) }
     }
 }

@@ -74,7 +74,7 @@ struct SettingsView: View {
             .tag(2)
         }
         .padding(20)
-        .frame(width: 500, height: 450)
+        .frame(width: 500, height: 450, alignment: .top)
         .alert("错误", isPresented: $showErrorAlert) {
             Button("确定", role: .cancel) {}
         } message: {

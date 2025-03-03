@@ -14,10 +14,11 @@ class WorkMonitor {
     
     func checkWorkStatus(timeSinceStart: TimeInterval, onCheckFail: WorkStatusCallback?) {
         // 检查应用监控状态
-        if !AppMonitor.shared.checkWorkStatus() {
+        let (appCheckResult, currentAppName) = AppMonitor.shared.checkWorkStatus()
+        if !appCheckResult {
             DispatchQueue.main.async {
                 if let onCheckFail = onCheckFail {
-                    onCheckFail("禁用应用超过限制时间", "请及时切换到工作相关的应用")
+                    onCheckFail("认真工作啦！", "工作中不可长时间使用 <\(currentAppName)>，请及时切换到工作相关的应用")
                 }
             }
             return
