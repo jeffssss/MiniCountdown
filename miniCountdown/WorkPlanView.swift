@@ -145,7 +145,7 @@ struct WorkPlanView: View {
     }
     
     private func createWorkPlan() {
-        if let plan = WorkMindManager.shared.createWorkPlan(periodDays: periodDays,
+        if let _ = WorkMindManager.shared.createWorkPlan(periodDays: periodDays,
                                                             startDate: startDate,
                                                             targetHours: targetHours,
                                                             workDays: workDays,

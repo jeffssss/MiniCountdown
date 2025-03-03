@@ -21,8 +21,10 @@ struct CountdownView: View {
     @State private var pauseStartTime: Date?
     
     @State private var compensateTime: Int
-    @State private var lastScreenshotTimeSinceStart : TimeInterval
     @State private var startTime : Date?
+    
+    // 添加工作监控器
+    private var workMonitor: WorkMonitor
     
     init(totalSeconds: Int, isAlwaysOnTop: Bool, isDarkMode: Bool, isAIMonitorEnabled: Bool = true) {
         self.totalSeconds = totalSeconds
@@ -31,7 +33,7 @@ struct CountdownView: View {
         self.isAIMonitorEnabled = isAIMonitorEnabled
         _remainingSeconds = State(initialValue: totalSeconds)
         self.compensateTime = 0
-        self.lastScreenshotTimeSinceStart = 0
+        self.workMonitor = WorkMonitor()
     }
     
     var body: some View {
@@ -56,7 +58,7 @@ struct CountdownView: View {
                                     isAIMonitorEnabled.toggle()
                                     if isAIMonitorEnabled, let startTime = startTime {
                                         // 更新lastScreenshotTimeSinceStart为当前时间减去补偿时间
-                                        lastScreenshotTimeSinceStart = Date().timeIntervalSince(startTime) - Double(compensateTime)
+                                        workMonitor.setLastScreenshotTime(Date().timeIntervalSince(startTime) - Double(compensateTime))
                                     }
                                 }) {
                                     Image(systemName: isAIMonitorEnabled ? "eye.circle.fill" : "eye.slash.circle.fill")
@@ -112,6 +114,7 @@ struct CountdownView: View {
         }
         .onAppear {
             print("CountdownView onAppear")
+
             // 创建倒计时记录
             currentRecord = WorkMindManager.shared.createRecord(duration: Int32(totalSeconds))
             startTimer()
@@ -129,28 +132,7 @@ struct CountdownView: View {
                 queue: .main
             ) { _ in
                 if !isPaused {
-                    let alert = NSAlert()
-                    alert.messageText = "检测到锁屏"
-                    alert.informativeText = "已检测到锁屏操作，点击确认继续工作"
-                    alert.alertStyle = .warning
-                    alert.addButton(withTitle: "确定")
-                    alert.window.level = .floating
-                    
-                    NSApp.activate(ignoringOtherApps: true)
-                    
-                    // 处理按钮点击回调
-                    let alertTime = Date()
-                    let response = alert.runModal()
-                    if response == .alertFirstButtonReturn {
-                        let confirmTime = Date()
-                        let confirmDelay = Int(confirmTime.timeIntervalSince(alertTime))
-                        if !isPaused {
-                            compensateTime += confirmDelay
-                            print("用户确认了警告信息,耗时为\(confirmDelay),会补充至compensateTime=\(compensateTime)")
-                        } else {
-                            print("用户确认了警告信息,耗时为\(confirmDelay),由于当前处于暂停状态，不补充时间")
-                        }
-                    }
+                    alert(alertMessage: "检测到锁屏", alertReason: "已检测到锁屏操作，点击确认继续工作" , playSound: false)
                 }
             }
         }
@@ -163,14 +145,41 @@ struct CountdownView: View {
         }
     }
     
+    private func alert(alertMessage:String, alertReason:String, playSound:Bool = true) {
+        if playSound {
+            alertSound()
+        }
+        
+        let alert = NSAlert()
+        alert.messageText = alertMessage
+        alert.informativeText = alertReason
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "确定")
+        // 获取 alert 窗口并设置其属性
+        alert.window.level = .floating
+        NSApp.activate(ignoringOtherApps: true)
+        
+        // 处理按钮点击回调
+        let alertTime = Date()
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            let confirmTime = Date()
+            let confirmDelay = Int(confirmTime.timeIntervalSince(alertTime))
+            if !self.isPaused {
+                self.compensateTime += confirmDelay
+                print("用户确认了警告信息,耗时为\(confirmDelay),会补充至compensateTime=\(self.compensateTime)")
+            } else {
+                print("用户确认了警告信息,耗时为\(confirmDelay),由于当前处于暂停状态，不补充时间")
+            }
+        }
+    }
+    
     private func calculateFontSize(for size: CGSize) -> CGFloat {
         let minDimension = min(size.width - 20, size.height)
         return minDimension * 0.8
     }
     
     private func startTimer() {
-        let screenshotManager = ScreenshotManager.shared
-        lastScreenshotTimeSinceStart = 0
         compensateTime = 0
         startTime = Date()  // 记录开始时间
         
@@ -186,52 +195,12 @@ struct CountdownView: View {
             if remainingSeconds > 0 {
                 // 检查是否需要执行截图
                 let timeSinceStart = currentTime.timeIntervalSince(startTime!) - Double(compensateTime)
-                if timeSinceStart - lastScreenshotTimeSinceStart >= screenshotManager.interval {
-                    lastScreenshotTimeSinceStart = timeSinceStart
-                    
-                    if isAIMonitorEnabled && AIService.shared.hasApiKey() {
-                        print("处理截图和识别逻辑")
-                        let screenshot = screenshotManager.takeScreenshot()
-                        if let image = screenshot.image, let screenshotPath = screenshot.path {
-                            AIService.shared.analyzeImage(image: image, screenshotPath: screenshotPath) { result, error in
-                                if let error = error {
-                                    print("AI分析失败: \(error.localizedDescription)")
-                                } else if let result = result {
-                                    print("AI分析结果: \(result)")
-                                    if let jsonData = result.data(using: .utf8),
-                                       let json = try? JSON(data: jsonData) {
-                                        if !json["isWorking"].boolValue {
-                                            DispatchQueue.main.async {
-                                                alertSound()
-                                                let alert = NSAlert()
-                                                alert.messageText = json["alert"].stringValue
-                                                alert.informativeText = json["reason"].stringValue
-                                                alert.alertStyle = .warning
-                                                alert.addButton(withTitle: "确定")
-                                                // 获取 alert 窗口并设置其属性
-                                                alert.window.level = .floating
-                                                NSApp.activate(ignoringOtherApps: true)
-                                                
-                                                // 处理按钮点击回调
-                                                let alertTime = Date()
-                                                let response = alert.runModal()
-                                                if response == .alertFirstButtonReturn {
-                                                    let confirmTime = Date()
-                                                    let confirmDelay = Int(confirmTime.timeIntervalSince(alertTime))
-                                                    if !isPaused {
-                                                        compensateTime += confirmDelay
-                                                        print("用户确认了警告信息,耗时为\(confirmDelay),会补充至compensateTime=\(compensateTime)")
-                                                    } else {
-                                                        print("用户确认了警告信息,耗时为\(confirmDelay),由于当前处于暂停状态，不补充时间")
-                                                    }
-                                                    
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                
+                // 使用WorkMonitor检查工作状态
+                if isAIMonitorEnabled {
+                    workMonitor.checkWorkStatus(timeSinceStart: timeSinceStart)
+                    { alertMessage, alertReason in
+                        alert(alertMessage: alertMessage, alertReason: alertReason)
                     }
                 }
             } else {

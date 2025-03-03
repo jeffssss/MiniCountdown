@@ -16,14 +16,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.regular)
         NotificationCenter.default.addObserver(self, selector: #selector(appWillTerminate(_:)), name: NSApplication.willTerminateNotification, object: nil)
         
-        // 添加锁屏状态监听
-//        NSWorkspace.shared.notificationCenter.addObserver(
-//            self,
-//            selector: #selector(screenDidLock(_:)),
-//            name: NSWorkspace.sessionDidResignActiveNotification,
-//            object: nil
-//        )
-        
         DistributedNotificationCenter.default().addObserver(self,
                                                             selector: #selector(screenDidLock(_:)),
                                                             name: NSNotification.Name(rawValue: "com.apple.screenIsLocked"),
