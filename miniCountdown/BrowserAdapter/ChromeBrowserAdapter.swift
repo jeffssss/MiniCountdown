@@ -30,10 +30,19 @@ class ChromeBrowserAdapter: BrowserAdapter {
         do {
             if let focusedWindow: UIElement = try uiApp.attribute(.focusedWindow) {
                 
-                title = try str(focusedWindow, .title)
+                title = try BrowserHelper.str(focusedWindow, .title)
                 
-                if let addressEle = try getAddrTextEle(focusedWindow) {
-                    url = try str(addressEle, .value)
+                let condition = { (e:UIElement) in
+                    if try e.attributeIsSupported("AXDOMClassList"),
+                       let domClass:[String] = try e.arrayAttribute("AXDOMClassList"),
+                       domClass.contains("OmniboxViewViews") {
+                        return true
+                    }
+                    return false
+                }
+                
+                if let addressEle = try BrowserHelper.getURLTextElement(focusedWindow, condition) {
+                    url = try BrowserHelper.str(addressEle, .value)
                     return BrowserInfo(url: url, title: title)
                 }
             }
@@ -45,19 +54,18 @@ class ChromeBrowserAdapter: BrowserAdapter {
         print("无法通过Accessibility API获取Chrome信息")
         return nil
     }
+}
+
+class BrowserHelper {
     
-    private func getAddrTextEle(_ ele:UIElement) throws -> UIElement? {
-        
-        if try ele.attributeIsSupported("AXDOMClassList") {
-            if let domClass:[String] = try ele.arrayAttribute("AXDOMClassList"), domClass.contains("OmniboxViewViews") {
-                return ele
-            }
+    static func getURLTextElement(_ ele:UIElement, _ condition: (UIElement) throws -> Bool) throws -> UIElement? {
+        if try condition(ele) {
+            return ele
         }
         
-        if try ele.attributeIsSupported(.children),
-           let children:[UIElement] = try ele.arrayAttribute(.children){
+        if try ele.attributeIsSupported(.children), let children:[UIElement] = try ele.arrayAttribute(.children){
             for c in children {
-                if let result = try getAddrTextEle(c) {
+                if let result = try getURLTextElement(c, condition) {
                     return result
                 }
             }
@@ -66,14 +74,15 @@ class ChromeBrowserAdapter: BrowserAdapter {
         return nil
     }
     
-    private func str(_ ele:UIElement, _ attr:Attribute) throws -> String {
+    
+    static func str(_ ele:UIElement, _ attr:Attribute) throws -> String {
         if let a:String =  try ele.attribute(attr) {
             return a
         }
         return "nil"
     }
     
-    private func str(_ ele:UIElement, _ attr:String) throws -> String {
+    static func str(_ ele:UIElement, _ attr:String) throws -> String {
         if let a:String =  try ele.attribute(attr) {
             return a
         }

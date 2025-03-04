@@ -2,6 +2,7 @@ import Foundation
 import AppKit
 import Cocoa
 import ApplicationServices
+import AXSwift
 
 // Safari浏览器适配器
 class SafariBrowserAdapter: BrowserAdapter {
@@ -13,43 +14,40 @@ class SafariBrowserAdapter: BrowserAdapter {
             return nil
         }
         
-        // 使用Accessibility API获取Safari的URL和标题
-        let appElement = AXUIElementCreateApplication(app.processIdentifier)
-
-        // 获取窗口
-        var value: CFTypeRef?
-        let windowResult = AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &value)
-        guard windowResult == .success, let windowsArray = value as? [AXUIElement], let window = windowsArray.first else {
-            print("无法获取Safari窗口")
+        // 提取URL和标题
+        var url = ""
+        var title = ""
+        
+        guard let uiApp = Application(app) else {
+            NSLog("Accessibility API执行失败")
             return nil
         }
         
-        // 获取工具栏
-        var toolbarValue: CFTypeRef?
-        let toolbarResult = AXUIElementCopyAttributeValue(window, "AXToolbar" as CFString, &toolbarValue)
-        
-        // 获取地址栏
-        var url = ""
-        if toolbarResult == .success {
-            let toolbar = (toolbarValue as! AXUIElement)
-            var addressValue: CFTypeRef?
-            if AXUIElementCopyAttributeValue(toolbar, "AXURLFieldText" as CFString, &addressValue) == .success,
-               let urlString = addressValue as? String {
-                url = urlString
+        do {
+            if let focusedWindow: UIElement = try uiApp.attribute(.focusedWindow) {
+                
+                title = try BrowserHelper.str(focusedWindow, .title)
+                
+                let condition = { (e:UIElement) in
+                    if try e.attributeIsSupported(.identifier),
+                       let identifier:String = try e.attribute(.identifier),
+                       identifier == "WEB_BROWSER_ADDRESS_AND_SEARCH_FIELD",
+                       try e.attributeIsSupported(.identifier), //获取的value需要保证是String类型
+                       let v:Any = try e.attribute(.value) , v is String {
+                        
+                        return true
+                    }
+                    return false
+                }
+                
+                if let addressEle = try BrowserHelper.getURLTextElement(focusedWindow, condition) {
+                    url = try BrowserHelper.str(addressEle, .value)
+                    return BrowserInfo(url: url, title: title)
+                }
             }
-        }
-        
-        // 获取标题
-        var titleValue: CFTypeRef?
-        let titleResult = AXUIElementCopyAttributeValue(window, kAXTitleAttribute as CFString, &titleValue)
-        var title = ""
-        if titleResult == .success, let titleString = titleValue as? String {
-            title = titleString.replacingOccurrences(of: " — Safari", with: "")
-        }
-        
-        // 确保至少有URL或标题
-        if !url.isEmpty || !title.isEmpty {
-            return BrowserInfo(url: url, title: title)
+        } catch {
+            NSLog("提取标题及URL异常:\(error.localizedDescription)")
+            return nil
         }
         
         print("无法通过Accessibility API获取Safari信息")
