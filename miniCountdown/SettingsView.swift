@@ -1,6 +1,10 @@
 import SwiftUI
 
 struct SettingsView: View {
+    // 导入导出设置
+    @State private var showImportPicker = false
+    @State private var showExportPicker = false
+    
     // 截图设置
     @State private var savePath: String = ScreenshotManager.shared.savePath
     @State private var screenshotInterval: String = String(Int(ScreenshotManager.shared.interval))
@@ -89,6 +93,20 @@ struct SettingsView: View {
                 Text("浏览器监控")
             }
             .tag(3)
+            
+            // 导入导出设置标签页
+            ImportExportSettingsView(
+                showImportPicker: $showImportPicker,
+                showExportPicker: $showExportPicker,
+                errorMessage: $errorMessage,
+                showErrorAlert: $showErrorAlert,
+                onSettingsUpdated: updateAllSettings
+            )
+            .tabItem {
+                Image(systemName: "gearshape.2")
+                Text("配置文件")
+            }
+            .tag(4)
         }
         .padding(20)
         .frame(width: 500, height: 450, alignment: .top)
@@ -97,49 +115,56 @@ struct SettingsView: View {
         } message: {
             Text(errorMessage)
         }
-        .fileImporter(
-            isPresented: $showFolderPicker,
-            allowedContentTypes: [.folder],
-            allowsMultipleSelection: false
-        ) { result in
-            switch result {
-            case .success(let urls):
-                if let selectedURL = urls.first {
-                    // 开始访问安全作用域资源
-                    guard selectedURL.startAccessingSecurityScopedResource() else {
-                        errorMessage = "无法访问所选文件夹，请重新选择。"
-                        showErrorAlert = true
-                        return
-                    }
-                    
-                    defer {
-                        selectedURL.stopAccessingSecurityScopedResource()
-                    }
-                    
-                    // 创建安全作用域书签
-                    do {
-                        let bookmarkData = try selectedURL.bookmarkData(
-                            options: .withSecurityScope,
-                            includingResourceValuesForKeys: nil,
-                            relativeTo: nil
-                        )
-                        
-                        // 保存书签数据
-                        UserDefaults.standard.set(bookmarkData, forKey: "screenshotFolderBookmark")
-                        
-                        // 更新保存路径
-                        savePath = selectedURL.path
-                        ScreenshotManager.shared.savePath = selectedURL.path
-                    } catch {
-                        errorMessage = "无法保存文件夹访问权限，请重新选择。"
-                        showErrorAlert = true
-                    }
+    }
+    
+    // 导入设置文件处理
+    private func handleImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            if let url = urls.first {
+                do {
+                    try SettingsManager.shared.importFromFile(url: url)
+                    // 更新所有状态变量
+                    savePath = ScreenshotManager.shared.savePath
+                    screenshotInterval = String(Int(ScreenshotManager.shared.interval))
+                    apiKey = AIService.shared.apiKey
+                    modelName = AIService.shared.modelName
+                    inputPrompt = AIService.shared.inputPrompt
+                    systemPrompt = AIService.shared.systemPrompt
+                    apiChannel = AIService.shared.aiChannel
+                    apiEndpoint = AIService.shared.apiEndpoint
+                    temperature = AIService.shared.temperature
+                    banList = AppMonitor.shared.banList
+                    timeout = String(AppMonitor.shared.timeout)
+                    urlBlacklist = BrowserMonitor.shared.urlBlacklist
+                    browserTimeout = String(BrowserMonitor.shared.timeout)
+                } catch {
+                    errorMessage = "导入设置失败: \(error.localizedDescription)"
+                    showErrorAlert = true
                 }
-            case .failure(let error):
-                errorMessage = "选择文件夹失败: \(error.localizedDescription)"
-                showErrorAlert = true
             }
+        case .failure(let error):
+            errorMessage = "选择文件失败: \(error.localizedDescription)"
+            showErrorAlert = true
         }
+    }
+    
+    // 更新所有设置状态变量
+    private func updateAllSettings() {
+        // 更新所有状态变量
+        savePath = ScreenshotManager.shared.savePath
+        screenshotInterval = String(Int(ScreenshotManager.shared.interval))
+        apiKey = AIService.shared.apiKey
+        modelName = AIService.shared.modelName
+        inputPrompt = AIService.shared.inputPrompt
+        systemPrompt = AIService.shared.systemPrompt
+        apiChannel = AIService.shared.aiChannel
+        apiEndpoint = AIService.shared.apiEndpoint
+        temperature = AIService.shared.temperature
+        banList = AppMonitor.shared.banList
+        timeout = String(AppMonitor.shared.timeout)
+        urlBlacklist = BrowserMonitor.shared.urlBlacklist
+        browserTimeout = String(BrowserMonitor.shared.timeout)
     }
 }
 
