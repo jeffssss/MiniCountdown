@@ -27,8 +27,6 @@ class AIService {
         return apiKeyPrefix + String(describing: aiChannel)
     }
     
-    
-    
     private let inputPromptKey = "aiServiceInputPrompt"
     private let systemPromptKey = "aiServiceSystemPrompt"
     
