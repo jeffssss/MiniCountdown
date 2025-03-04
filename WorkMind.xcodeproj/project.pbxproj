@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		321AE24D2D773E350054EFBF /* AXSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 321AE24C2D773E350054EFBF /* AXSwift */; };
 		323CE2C12D5BD24200AFF6D2 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 323CE2C02D5BD24200AFF6D2 /* Alamofire */; };
 		323CE2C42D5BD25200AFF6D2 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 323CE2C32D5BD25200AFF6D2 /* SwiftyJSON */; };
 		32C38BFD2D096E10004BA794 /* finish_sound.wav in Resources */ = {isa = PBXBuildFile; fileRef = 32C38BFC2D096E10004BA794 /* finish_sound.wav */; };
@@ -45,6 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				321AE24D2D773E350054EFBF /* AXSwift in Frameworks */,
 				323CE2C42D5BD25200AFF6D2 /* SwiftyJSON in Frameworks */,
 				323CE2C12D5BD24200AFF6D2 /* Alamofire in Frameworks */,
 			);
@@ -93,6 +95,7 @@
 			packageProductDependencies = (
 				323CE2C02D5BD24200AFF6D2 /* Alamofire */,
 				323CE2C32D5BD25200AFF6D2 /* SwiftyJSON */,
+				321AE24C2D773E350054EFBF /* AXSwift */,
 			);
 			productName = miniCountdown;
 			productReference = 32C38BE62D095608004BA794 /* WorkMind.app */;
@@ -126,6 +129,7 @@
 			packageReferences = (
 				323CE2BF2D5BD24200AFF6D2 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				323CE2C22D5BD25200AFF6D2 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
+				321AE24B2D773E350054EFBF /* XCLocalSwiftPackageReference "../../git/ios/AXSwift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 32C38BE72D095608004BA794 /* Products */;
@@ -367,6 +371,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		321AE24B2D773E350054EFBF /* XCLocalSwiftPackageReference "../../git/ios/AXSwift" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../git/ios/AXSwift;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		323CE2BF2D5BD24200AFF6D2 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -387,6 +398,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		321AE24C2D773E350054EFBF /* AXSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AXSwift;
+		};
 		323CE2C02D5BD24200AFF6D2 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 323CE2BF2D5BD24200AFF6D2 /* XCRemoteSwiftPackageReference "Alamofire" */;

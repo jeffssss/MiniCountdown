@@ -27,8 +27,8 @@ class AppMonitor {
     
     private init() {}
     
-    func checkWorkStatus() -> (Bool,String) {
-        guard let frontmostApp = NSWorkspace.shared.frontmostApplication else { return (true, "")}
+    func checkWorkStatus() -> (Bool, AppInfo?) {
+        guard let frontmostApp = NSWorkspace.shared.frontmostApplication else { return (true, nil)}
         let bundleIdentifier = frontmostApp.bundleIdentifier ?? ""
         let appName = frontmostApp.localizedName ?? "当前应用"
         
@@ -39,7 +39,7 @@ class AppMonitor {
                 print("切换至: \(appName)(\(bundleIdentifier)) in ban list")
                 lastActiveApp = bundleIdentifier
                 lastActiveTime = Date()
-                return (true, appName)
+                return (true, AppInfo(bundleIdentifier: bundleIdentifier,name: appName))
             }
             
             // 如果已经在使用这个应用
@@ -47,7 +47,7 @@ class AppMonitor {
                 let duration = Date().timeIntervalSince(lastTime)
                 if duration > Double(timeout) {
                     lastActiveTime = Date()
-                    return (false, appName)
+                    return (false, AppInfo(bundleIdentifier: bundleIdentifier,name: appName))
                 }
             }
         } else {
@@ -59,7 +59,7 @@ class AppMonitor {
             }
         }
         
-        return (true,appName)
+        return (true, AppInfo(bundleIdentifier: bundleIdentifier,name: appName))
     }
     
     func addToBanList(_ bundleIdentifier: String) {

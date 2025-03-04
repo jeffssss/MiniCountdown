@@ -4,6 +4,7 @@ import SwiftyJSON
 
 class WorkMonitor {
     private let screenshotManager = ScreenshotManager.shared
+    private let browserMonitor = BrowserMonitor.shared
     private var lastScreenshotTimeSinceStart: TimeInterval = 0
     
     typealias WorkStatusCallback = (String, String) -> Void
@@ -14,15 +15,32 @@ class WorkMonitor {
     
     func checkWorkStatus(timeSinceStart: TimeInterval, onCheckFail: WorkStatusCallback?) {
         // 检查应用监控状态
-        let (appCheckResult, currentAppName) = AppMonitor.shared.checkWorkStatus()
+        let (appCheckResult, currentAppInfo) = AppMonitor.shared.checkWorkStatus()
         if !appCheckResult {
             DispatchQueue.main.async {
                 if let onCheckFail = onCheckFail {
-                    onCheckFail("认真工作啦！", "工作中不可长时间使用 <\(currentAppName)>，请及时切换到工作相关的应用")
+                    onCheckFail("认真工作啦！", "工作中不可长时间使用 <\(currentAppInfo?.name ?? "娱乐软件")>，请及时切换到工作相关的应用")
                 }
             }
             return
         }
+        
+        //如果聚焦浏览器，则进行url检查
+        if let currentAppInfo = currentAppInfo,
+            browserMonitor.isBrowserApp(currentAppInfo) {
+            
+            let (browserCheckResult, browserInfo) = browserMonitor.checkBrowserStatus(currentAppInfo)
+            if !browserCheckResult {
+                DispatchQueue.main.async {
+                    if let onCheckFail = onCheckFail {
+                        onCheckFail("注意网页浏览！", "工作中不可长时间浏览当前网页")
+                    }
+                }
+                return
+            }
+        }
+
+        
         
         if timeSinceStart - lastScreenshotTimeSinceStart >= screenshotManager.interval {
             lastScreenshotTimeSinceStart = timeSinceStart

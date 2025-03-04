@@ -21,6 +21,11 @@ struct SettingsView: View {
     @State private var selectedApp: AppInfo? = nil
     @State private var runningApps: [AppInfo] = []
     
+    // 浏览器监控设置
+    @State private var urlBlacklist: [String] = BrowserMonitor.shared.urlBlacklist
+    @State private var browserTimeout: String = String(BrowserMonitor.shared.timeout)
+    @State private var showBrowserTimeoutError = false
+    
     @State private var showIntervalError = false
     @State private var showFolderPicker = false
     @State private var showErrorAlert = false
@@ -72,6 +77,18 @@ struct SettingsView: View {
                 Text("应用监控")
             }
             .tag(2)
+            
+            // 浏览器监控标签页
+            BrowserMonitorSettingsView(
+                urlBlacklist: $urlBlacklist,
+                timeout: $browserTimeout,
+                showTimeoutError: $showBrowserTimeoutError
+            )
+            .tabItem {
+                Image(systemName: "globe")
+                Text("浏览器监控")
+            }
+            .tag(3)
         }
         .padding(20)
         .frame(width: 500, height: 450, alignment: .top)
