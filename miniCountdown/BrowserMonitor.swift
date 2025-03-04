@@ -86,7 +86,8 @@ class BrowserMonitor {
             if let lastTime = lastActiveTime {
                 let duration = Date().timeIntervalSince(lastTime)
                 if duration > Double(timeout) {
-                    lastActiveTime = Date()
+                    lastActiveUrl = nil
+                    lastActiveTime = nil
                     return (false, browserInfo)
                 }
             }
