@@ -47,8 +47,6 @@ struct ImportExportSettingsView: View {
                             .frame(minWidth: 120)
                         }
                         .buttonStyle(.bordered)
-
-                        Text("\(showImportPicker ? "导入中..." : "没导入中...")")
                     }
                     .padding(.top, 8)
                     

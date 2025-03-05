@@ -12,8 +12,8 @@ class SettingsManager {
         var screenshotInterval: Int
         
         // AI服务设置
-        var apiKey: String
-        var modelName: String
+        var channelApiKeys: [String: String]
+        var channelModelNames: [String: String]
         var inputPrompt: String
         var systemPrompt: String
         var apiChannel: Int
@@ -31,11 +31,23 @@ class SettingsManager {
     
     // 导出设置
     func exportSettings() -> Settings {
+        // 收集所有channel的apiKey和modelName
+        var channelApiKeys: [String: String] = [:]
+        var channelModelNames: [String: String] = [:]
+        
+        for channel in APIChannel.allCases {
+            let currentChannel = AIService.shared.aiChannel
+            AIService.shared.aiChannel = channel
+            channelApiKeys[String(describing: channel)] = AIService.shared.apiKey
+            channelModelNames[String(describing: channel)] = AIService.shared.modelName
+            AIService.shared.aiChannel = currentChannel
+        }
+        
         return Settings(
             screenshotSavePath: ScreenshotManager.shared.savePath,
             screenshotInterval: Int(ScreenshotManager.shared.interval),
-            apiKey: AIService.shared.apiKey,
-            modelName: AIService.shared.modelName,
+            channelApiKeys: channelApiKeys,
+            channelModelNames: channelModelNames,
             inputPrompt: AIService.shared.inputPrompt,
             systemPrompt: AIService.shared.systemPrompt,
             apiChannel: AIService.shared.aiChannel.rawValue,
@@ -55,11 +67,18 @@ class SettingsManager {
         ScreenshotManager.shared.interval = Double(settings.screenshotInterval)
         
         // 更新AI服务设置
-        AIService.shared.apiKey = settings.apiKey
-        AIService.shared.modelName = settings.modelName
+        for channel in APIChannel.allCases {
+            AIService.shared.aiChannel = channel
+            if let apiKey = settings.channelApiKeys[String(describing: channel)] {
+                AIService.shared.apiKey = apiKey
+            }
+            if let modelName = settings.channelModelNames[String(describing: channel)] {
+                AIService.shared.modelName = modelName
+            }
+        }
+        AIService.shared.aiChannel = APIChannel(rawValue: settings.apiChannel) ?? .openAI
         AIService.shared.inputPrompt = settings.inputPrompt
         AIService.shared.systemPrompt = settings.systemPrompt
-        AIService.shared.aiChannel = APIChannel(rawValue: settings.apiChannel) ?? .openAI
         AIService.shared.apiEndpoint = settings.apiEndpoint
         AIService.shared.temperature = settings.temperature
         
