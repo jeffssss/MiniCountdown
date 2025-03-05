@@ -8,7 +8,8 @@ struct CountdownView: View {
     let isAlwaysOnTop: Bool
     let isDarkMode: Bool
     
-    @State private var isMonitorEnabled : Bool
+    @State private var isAppMonitorEnabled : Bool
+    @State private var isAIMonitorEnabled : Bool
     
     @State private var remainingSeconds: Int
     @State private var timer: Timer?
@@ -26,11 +27,12 @@ struct CountdownView: View {
     // 添加工作监控器
     private var workMonitor: WorkMonitor
     
-    init(totalSeconds: Int, isAlwaysOnTop: Bool, isDarkMode: Bool, isMonitorEnabled: Bool = true) {
+    init(totalSeconds: Int, isAlwaysOnTop: Bool, isDarkMode: Bool, isAppMonitorEnabled: Bool = true, isAIMonitorEnabled: Bool = true) {
         self.totalSeconds = totalSeconds
         self.isAlwaysOnTop = isAlwaysOnTop
         self.isDarkMode = isDarkMode
-        self.isMonitorEnabled = isMonitorEnabled
+        self.isAppMonitorEnabled = isAppMonitorEnabled
+        self.isAIMonitorEnabled = isAIMonitorEnabled
         _remainingSeconds = State(initialValue: totalSeconds)
         self.compensateTime = 0
         self.workMonitor = WorkMonitor()
@@ -55,16 +57,24 @@ struct CountdownView: View {
                             Spacer()
                             HStack {
                                 Button(action: {
-                                    isMonitorEnabled.toggle()
-                                    if isMonitorEnabled, let startTime = startTime {
+                                    isAppMonitorEnabled.toggle()
+                                }) {
+                                    Image(systemName: isAppMonitorEnabled ? "eye.circle.fill" : "eye.slash.circle.fill")
+                                        .font(.system(size: 18))
+                                        .foregroundColor(isAppMonitorEnabled ? (isDarkMode ? .white : .black) : .gray)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                
+                                Button(action: {
+                                    isAIMonitorEnabled.toggle()
+                                    if isAIMonitorEnabled, let startTime = startTime {
                                         // 更新lastScreenshotTimeSinceStart为当前时间减去补偿时间
                                         workMonitor.setLastScreenshotTime(Date().timeIntervalSince(startTime) - Double(compensateTime))
                                     }
                                 }) {
-                                    Image(systemName: isMonitorEnabled ? "eye.circle.fill" : "eye.slash.circle.fill")
+                                    Image(systemName: isAIMonitorEnabled ? "sparkles.rectangle.stack.fill" : "sparkles.rectangle.stack")
                                         .font(.system(size: 18))
-                                        .foregroundColor(isMonitorEnabled ? (isDarkMode ? .white : .black) : .gray)
-                                        .padding(8)
+                                        .foregroundColor(isAIMonitorEnabled ? (isDarkMode ? .white : .black) : .gray)
                                 }
                                 .buttonStyle(PlainButtonStyle())
                                 
@@ -88,7 +98,7 @@ struct CountdownView: View {
                                         .foregroundColor(isDarkMode ? .white : .black)
                                 }
                                 .buttonStyle(PlainButtonStyle())
-                                .padding(8)
+                                .padding(.horizontal, 6)
                             }
                         }
                     }
@@ -105,7 +115,7 @@ struct CountdownView: View {
                         .foregroundColor(isDarkMode ? .white : .black)
                 }
                 .buttonStyle(PlainButtonStyle())
-                .padding(2)
+
             }
         }
         .preferredColorScheme(isDarkMode ? .dark : .light)
@@ -197,11 +207,9 @@ struct CountdownView: View {
                 let timeSinceStart = currentTime.timeIntervalSince(startTime!) - Double(compensateTime)
                 
                 // 使用WorkMonitor检查工作状态
-                if isMonitorEnabled {
-                    workMonitor.checkWorkStatus(timeSinceStart: timeSinceStart)
-                    { alertMessage, alertReason in
-                        alert(alertMessage: alertMessage, alertReason: alertReason)
-                    }
+                workMonitor.checkWorkStatus(timeSinceStart: timeSinceStart, appMonitor:isAppMonitorEnabled, aiMonitor:isAIMonitorEnabled)
+                { alertMessage, alertReason in
+                    alert(alertMessage: alertMessage, alertReason: alertReason)
                 }
             } else {
                 closeCountdownWindow(status: .completed)

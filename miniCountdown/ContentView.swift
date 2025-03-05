@@ -14,7 +14,8 @@ struct ContentView: View {
     @State private var seconds: String = "0"
     @State private var isAlwaysOnTop: Bool = true
     @State private var isDarkMode: Bool = false
-    @State private var isMonitorEnabled: Bool = true
+    @State private var isAppMonitorEnabled: Bool = true
+    @State private var isAIMonitorEnabled: Bool = true
     @State private var currentPlan: WorkPlanRecord? = nil
     @State private var todayCompletedMinutes: Int = 0
     @State private var showWorkPlanList: Bool = true
@@ -69,7 +70,10 @@ struct ContentView: View {
             Toggle("深色模式", isOn: $isDarkMode)
                 .padding(.horizontal)
             
-            Toggle("AI监控", isOn: $isMonitorEnabled)
+            Toggle("应用监控", isOn: $isAppMonitorEnabled)
+                .padding(.horizontal)
+            
+            Toggle("AI监控", isOn: $isAIMonitorEnabled)
                 .padding(.horizontal)
             
             Button(action: {
@@ -151,7 +155,8 @@ struct ContentView: View {
             totalSeconds: totalSeconds,
             isAlwaysOnTop: isAlwaysOnTop,
             isDarkMode: isDarkMode,
-            isMonitorEnabled: isMonitorEnabled
+            isAppMonitorEnabled: isAppMonitorEnabled,
+            isAIMonitorEnabled: isAIMonitorEnabled
         )
         
         let window = NSWindow(

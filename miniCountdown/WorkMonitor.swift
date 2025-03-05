@@ -13,36 +13,40 @@ class WorkMonitor {
         lastScreenshotTimeSinceStart = time
     }
     
-    func checkWorkStatus(timeSinceStart: TimeInterval, onCheckFail: WorkStatusCallback?) {
-        // 检查应用监控状态
-        let (appCheckResult, currentAppInfo) = AppMonitor.shared.checkWorkStatus()
-        if !appCheckResult {
-            DispatchQueue.main.async {
-                if let onCheckFail = onCheckFail {
-                    onCheckFail("认真工作啦！", "工作中不可长时间使用 <\(currentAppInfo?.name ?? "娱乐软件")>，请及时切换到工作相关的应用")
-                }
-            }
-            return
-        }
+    func checkWorkStatus(timeSinceStart: TimeInterval, appMonitor:Bool, aiMonitor:Bool, onCheckFail: WorkStatusCallback?) {
         
-        //如果聚焦浏览器，则进行url检查
-        if let currentAppInfo = currentAppInfo,
-            browserMonitor.isBrowserApp(currentAppInfo) {
+        if appMonitor {
             
-            let (browserCheckResult, browserInfo) = browserMonitor.checkBrowserStatus(currentAppInfo)
-            if !browserCheckResult {
+            // 检查应用监控状态,检查失败可以直接返回
+            let (appCheckResult, currentAppInfo) = AppMonitor.shared.checkWorkStatus()
+            if !appCheckResult {
                 DispatchQueue.main.async {
                     if let onCheckFail = onCheckFail {
-                        onCheckFail("注意网页浏览！", "工作中不可长时间浏览当前网页")
+                        onCheckFail("认真工作啦！", "工作中不可长时间使用 <\(currentAppInfo?.name ?? "娱乐软件")>，请及时切换到工作相关的应用")
                     }
                 }
                 return
             }
+            
+            //如果聚焦浏览器，则进行url检查
+            if let currentAppInfo = currentAppInfo,
+                browserMonitor.isBrowserApp(currentAppInfo) {
+                
+                let (browserCheckResult, browserInfo) = browserMonitor.checkBrowserStatus(currentAppInfo)
+                if !browserCheckResult {
+                    DispatchQueue.main.async {
+                        if let onCheckFail = onCheckFail {
+                            onCheckFail("注意网页浏览！", "工作中不可长时间浏览当前网页")
+                        }
+                    }
+                    return
+                }
+            }
         }
-
         
-        
-        if timeSinceStart - lastScreenshotTimeSinceStart >= screenshotManager.interval {
+        //执行ai截图识别
+        if aiMonitor,
+            timeSinceStart - lastScreenshotTimeSinceStart >= screenshotManager.interval {
             lastScreenshotTimeSinceStart = timeSinceStart
             //处理AI图像识别
             if AIService.shared.hasApiKey() {
@@ -71,4 +75,5 @@ class WorkMonitor {
             }
         }
     }
+
 }
